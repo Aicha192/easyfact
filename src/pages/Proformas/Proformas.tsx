@@ -9,8 +9,10 @@ import {
   Printer,
 } from "lucide-react";
 import Modal from "../../components/ui/Modal";
+import Sheet from "../../components/ui/Sheet";
 import ProformaForm from "../../components/proformas/ProformaForm";
 import type { Proforma } from "../../types/proforma";
+import type { Facture } from "../../types/facture";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -21,12 +23,19 @@ import { useFactureStore } from "../../store/factureStore";
 import ProformaPreview from "../../components/proformas/ProformaPreview";
 import { useNumeroStore } from "../../store/numeroStore";
 import { generateNumber } from "../../utils/numberGenerator";
+import { useNotificationStore } from "../../store/notificationStore";
+import ProformaSearch from "../../components/proformas/ProformaSearch";
 
 export default function Proformas() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const [editingProforma, setEditingProforma] = useState<Proforma | null>(null);
+
+  const [proformaToConvert, setProformaToConvert] = useState<Proforma | null>(
+    null,
+  );
 
   const [deleteDialog, setDeleteDialog] = useState(false);
 
@@ -35,6 +44,10 @@ export default function Proformas() {
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const [previewProforma, setPreviewProforma] = useState<Proforma | null>(null);
+
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification,
+  );
 
   const addProforma = useProformaStore((state) => state.addProforma);
 
@@ -46,27 +59,31 @@ export default function Proformas() {
 
   const proformas = useProformaStore((state) => state.proformas);
 
+  const filteredProformas = proformas.filter(
+  (proforma) =>
+    proforma.numero
+      .toLowerCase()
+      .includes(search.toLowerCase()) ||
+    proforma.client
+      .toLowerCase()
+      .includes(search.toLowerCase())
+);
+
   const getNextFacture = useNumeroStore((state) => state.getNextFacture);
 
   useEffect(() => {
+    const previewId = location.state?.previewId;
 
-  const previewId = location.state?.previewId;
+    if (!previewId) return;
 
-  if (!previewId) return;
+    const proforma = proformas.find((p) => p.id === previewId);
 
-  const proforma = proformas.find(
-    (p) => p.id === previewId
-  );
+    if (proforma) {
+      setPreviewProforma(proforma);
 
-  if (proforma) {
-
-    setPreviewProforma(proforma);
-
-    setPreviewOpen(true);
-
-  }
-
-}, [location.state, proformas]);
+      setPreviewOpen(true);
+    }
+  }, [location.state, proformas]);
 
   const totalProformas = proformas.length;
 
@@ -78,11 +95,31 @@ export default function Proformas() {
   function handleAddProforma(proforma: Proforma) {
     addProforma(proforma);
 
+    addNotification({
+      title: "Nouvelle proforma créée",
+
+      message: `La proforma ${proforma.numero} a été créée.`,
+
+     createdAt: Date.now(),
+
+      type: "proforma",
+    });
+
     setIsOpen(false);
   }
 
   function handleUpdateProforma(proforma: Proforma) {
     updateProforma(proforma);
+
+    addNotification({
+      title: "Proforma modifiée",
+
+      message: `La proforma ${proforma.numero} a été modifiée.`,
+
+      createdAt: Date.now(),
+
+      type: "proforma",
+    });
 
     setEditingProforma(null);
 
@@ -92,7 +129,19 @@ export default function Proformas() {
   function handleDeleteProforma() {
     if (proformaToDelete === null) return;
 
+    const deletedProforma = proformas.find((p) => p.id === proformaToDelete);
+
     deleteProforma(proformaToDelete);
+
+    addNotification({
+      title: "Proforma supprimée",
+
+      message: `La proforma ${deletedProforma?.numero ?? ""} a été supprimée.`,
+
+     createdAt: Date.now(),
+
+      type: "proforma",
+    });
 
     setDeleteDialog(false);
 
@@ -100,7 +149,7 @@ export default function Proformas() {
   }
 
   function handleConvertToFacture(proforma: Proforma) {
-    addFacture({
+    const newFacture: Facture = {
       id: Date.now(),
 
       numero: generateNumber("FAC", getNextFacture()),
@@ -122,7 +171,33 @@ export default function Proformas() {
       statut: "Brouillon",
 
       notes: `Créée depuis la proforma ${proforma.numero}`,
+    };
+
+    addFacture(newFacture);
+
+    updateProforma({
+      ...proforma,
+      factureNumero: newFacture.numero,
     });
+
+    addNotification({
+      title: "Proforma convertie",
+
+      message: `${proforma.numero} a été convertie en facture ${newFacture.numero}.`,
+
+     createdAt: Date.now(),
+
+      type: "facture",
+    });
+    setProformaToConvert(null);
+  }
+
+  function confirmConvertToFacture() {
+    if (!proformaToConvert) return;
+
+    handleConvertToFacture(proformaToConvert);
+
+    setProformaToConvert(null);
   }
 
   return (
@@ -174,13 +249,15 @@ export default function Proformas() {
         </div>
       </div>
 
+      <ProformaSearch value={search} onChange={setSearch}/>
+
       {/* Tableau */}
 
-      <div className="overflow-hidden rounded-xl border">
-        <table className="w-full">
+       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+       <table className="w-full">
           <thead className="bg-slate-100">
             <tr>
-              <th className="p-3 text-left">Numéro</th>
+              <th className="p-4 text-left">Numéro</th>
 
               <th>Client</th>
 
@@ -193,9 +270,9 @@ export default function Proformas() {
           </thead>
 
           <tbody>
-            {proformas.map((proforma) => (
-              <tr key={proforma.id} className="border-t">
-                <td className="p-3 font-medium">{proforma.numero}</td>
+            {filteredProformas.map((proforma) => (
+              <tr key={proforma.id} className="border-t hover:bg-slate-50">
+                <td className="p-4 font-semibold">{proforma.numero}</td>
 
                 <td>{proforma.client}</td>
 
@@ -270,13 +347,30 @@ export default function Proformas() {
                       <Printer size={18} />
                     </button>
 
-                    <button
-                      onClick={() => handleConvertToFacture(proforma)}
-                      className="rounded-lg bg-violet-100 p-2 text-violet-600 hover:bg-violet-200"
-                      title="Transformer en facture"
-                    >
-                      <Receipt size={18} />
-                    </button>
+                    {proforma.factureNumero ? (
+                      <div
+                        className="
+      rounded-lg
+      bg-emerald-100
+      px-3
+      py-2
+      text-sm
+      font-medium
+      text-emerald-700
+    "
+                        title={`Convertie en ${proforma.factureNumero}`}
+                      >
+                        {proforma.factureNumero}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setProformaToConvert(proforma)}
+                        className="rounded-lg bg-violet-100 p-2 text-violet-600 hover:bg-violet-200"
+                        title="Transformer en facture"
+                      >
+                        <Receipt size={18} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -285,9 +379,10 @@ export default function Proformas() {
         </table>
       </div>
 
-      <Modal
+      <Sheet
         isOpen={isOpen}
         title="Nouvelle proforma"
+        size="lg"
         onClose={() => setIsOpen(false)}
       >
         <ProformaForm
@@ -298,7 +393,7 @@ export default function Proformas() {
             setIsOpen(false);
           }}
         />
-      </Modal>
+      </Sheet>
       <ConfirmDialog
         isOpen={deleteDialog}
         title="Supprimer la proforma"
@@ -316,6 +411,55 @@ export default function Proformas() {
       >
         {previewProforma && <ProformaPreview proforma={previewProforma} />}
       </Modal>
+
+      {proformaToConvert && (
+        <Modal
+          isOpen={!!proformaToConvert}
+          title="Convertir en facture ?"
+          onClose={() => setProformaToConvert(null)}
+        >
+          <div className="space-y-5">
+            <p className="text-gray-600">
+              Vous êtes sur le point de convertir la proforma{" "}
+              <span className="font-semibold">{proformaToConvert.numero}</span>{" "}
+              en facture.
+            </p>
+
+            <p className="text-sm text-gray-500">
+              Une nouvelle facture sera créée à partir de cette proforma.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setProformaToConvert(null)}
+                className="
+            rounded-lg
+            border
+            px-4
+            py-2
+            hover:bg-gray-100
+          "
+              >
+                Annuler
+              </button>
+
+              <button
+                onClick={confirmConvertToFacture}
+                className="
+            rounded-lg
+            bg-violet-600
+            px-4
+            py-2
+            text-white
+            hover:bg-violet-700
+          "
+              >
+                Convertir
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-
-import Modal from "../../components/ui/Modal";
+// import Modal from "../../components/ui/Modal";
 import ClientForm, {
   type ClientFormData,
 } from "../../components/clients/ClientForm";
@@ -11,25 +10,23 @@ import ClientTable from "../../components/clients/ClientTable";
 import { useClientStore } from "../../store/clientStore";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import type { Client } from "../../types/client";
+import { useNotificationStore } from "../../store/notificationStore";
+import Sheet from "../../components/ui/Sheet";
 
 export default function Clients() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const clientList = useClientStore(
-  (state) => state.clients
-);
+  const clientList = useClientStore((state) => state.clients);
 
-const addClient = useClientStore(
-  (state) => state.addClient
-);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification,
+  );
 
-const updateClient = useClientStore(
-  (state) => state.updateClient
-);
+  const addClient = useClientStore((state) => state.addClient);
 
-const deleteClient = useClientStore(
-  (state) => state.deleteClient
-);
+  const updateClient = useClientStore((state) => state.updateClient);
+
+  const deleteClient = useClientStore((state) => state.deleteClient);
 
   const [editingClient, setEditingClient] = useState<
     (ClientFormData & { id: number }) | null
@@ -42,42 +39,78 @@ const deleteClient = useClientStore(
   const [search, setSearch] = useState("");
 
   function handleAddClient(data: ClientFormData) {
-  const newClient: Client = {
-    id: Date.now(),
-    ...data,
-  };
+    const newClient: Client = {
+      id: Date.now(),
+      ...data,
+    };
 
-  addClient(newClient);
+    addClient(newClient);
 
-  setIsOpen(false);
+    addNotification({
+      title: "Nouveau client ajouté",
 
-  toast.success("Client ajouté avec succès !");
-}
+      message: `${newClient.nom} a été ajouté aux clients.`,
+
+     createdAt: Date.now(),
+
+      type: "client",
+    });
+
+    setIsOpen(false);
+
+    toast.success("Client ajouté avec succès !");
+  }
 
   function handleUpdateClient(data: ClientFormData) {
-  if (!editingClient) return;
+    if (!editingClient) return;
 
-  updateClient({
-    ...editingClient,
-    ...data,
-  });
+    const updatedClient = {
+      ...editingClient,
+      ...data,
+    };
 
-  setEditingClient(null);
-  setIsOpen(false);
+    updateClient(updatedClient);
 
-  toast.success("Client modifié avec succès !");
-}
+    addNotification({
+      title: "Client modifié",
+
+      message: `${updatedClient.nom} a été modifié.`,
+
+      createdAt: Date.now(),
+
+      type: "client",
+    });
+
+    setEditingClient(null);
+
+    setIsOpen(false);
+
+    toast.success("Client modifié avec succès !");
+  }
 
   function handleDeleteClient() {
-  if (clientToDelete === null) return;
+    if (clientToDelete === null) return;
 
-  deleteClient(clientToDelete);
+    const client = clientList.find((client) => client.id === clientToDelete);
 
-  setDeleteDialog(false);
-  setClientToDelete(null);
+    deleteClient(clientToDelete);
 
-  toast.success("Client supprimé avec succès !");
-}
+    addNotification({
+      title: "Client supprimé",
+
+      message: `${client?.nom ?? "Le client"} a été supprimé.`,
+
+      createdAt: Date.now(),
+
+      type: "client",
+    });
+
+    setDeleteDialog(false);
+
+    setClientToDelete(null);
+
+    toast.success("Client supprimé avec succès !");
+  }
 
   const filteredClients = clientList.filter(
     (client) =>
@@ -120,9 +153,10 @@ const deleteClient = useClientStore(
           setDeleteDialog(true);
         }}
       />
-      <Modal
+      <Sheet
         isOpen={isOpen}
         title={editingClient ? "Modifier le client" : "Nouveau client"}
+        size="md"
         onClose={() => {
           setEditingClient(null);
           setIsOpen(false);
@@ -136,7 +170,7 @@ const deleteClient = useClientStore(
             setIsOpen(false);
           }}
         />
-      </Modal>
+      </Sheet>
 
       <ConfirmDialog
         isOpen={deleteDialog}
@@ -148,6 +182,7 @@ const deleteClient = useClientStore(
         }}
         onConfirm={handleDeleteClient}
       />
+      
     </div>
   );
 }

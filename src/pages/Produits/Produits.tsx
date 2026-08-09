@@ -1,22 +1,24 @@
 import { useState } from "react";
 
-import Modal from "../../components/ui/Modal";
+import Sheet from "../../components/ui/Sheet";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import ProduitStats from "../../components/produits/ProduitStats";
 import ProduitForm from "../../components/produits/ProduitForm";
 import ProduitTable from "../../components/produits/ProduitTable";
 import ProduitSearch from "../../components/produits/ProduitSearch";
 import type { ProduitFormData } from "../../components/produits/ProduitForm";
-
+import { useNotificationStore } from "../../store/notificationStore";
 import { useProduitStore } from "../../store/produitStore";
-
 import type { Produit } from "../../types/produit";
-
 import toast from "react-hot-toast";
 
 export default function Produits() {
   const produitList = useProduitStore(
   (state) => state.produits
+);
+
+const addNotification = useNotificationStore(
+  (state) => state.addNotification
 );
 
 const addProduit = useProduitStore(
@@ -48,6 +50,7 @@ const deleteProduit = useProduitStore(
   );
 
   function handleAddProduit(data: ProduitFormData) {
+
   const newProduit: Produit = {
     id: Date.now(),
     ...data,
@@ -55,17 +58,34 @@ const deleteProduit = useProduitStore(
 
   addProduit(newProduit);
 
+  addNotification({
+    title: "Nouveau produit ajouté",
+    message: `${newProduit.nom} a été ajouté au catalogue.`,
+   createdAt: Date.now(),
+    type: "produit",
+  });
+
   setIsOpen(false);
 
   toast.success("Produit ajouté avec succès !");
 }
 
   function handleUpdateProduit(data: ProduitFormData) {
+
   if (!editingProduit) return;
 
-  updateProduit({
+  const updatedProduit = {
     ...editingProduit,
     ...data,
+  };
+
+  updateProduit(updatedProduit);
+
+  addNotification({
+    title: "Produit modifié",
+    message: `${updatedProduit.nom} a été modifié.`,
+    createdAt: Date.now(),
+    type: "produit",
   });
 
   setEditingProduit(null);
@@ -76,11 +96,24 @@ const deleteProduit = useProduitStore(
 }
 
   function handleDeleteProduit() {
+
   if (produitToDelete === null) return;
+
+  const deletedProduit = produitList.find(
+    (produit) => produit.id === produitToDelete
+  );
 
   deleteProduit(produitToDelete);
 
+  addNotification({
+    title: "Produit supprimé",
+    message: `${deletedProduit?.nom ?? "Le produit"} a été supprimé.`,
+    createdAt: Date.now(),
+    type: "produit",
+  });
+
   setDeleteDialog(false);
+
   setProduitToDelete(null);
 
   toast.success("Produit supprimé avec succès !");
@@ -123,9 +156,10 @@ const deleteProduit = useProduitStore(
         }}
       />
 
-      <Modal
+      <Sheet
         isOpen={isOpen}
         title={editingProduit ? "Modifier le produit" : "Nouveau produit"}
+        size="md"
         onClose={() => {
           setEditingProduit(null);
           setIsOpen(false);
@@ -140,7 +174,7 @@ const deleteProduit = useProduitStore(
             setIsOpen(false);
           }}
         />
-      </Modal>
+      </Sheet>
 
       <ConfirmDialog
         isOpen={deleteDialog}

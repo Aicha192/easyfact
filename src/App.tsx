@@ -12,6 +12,10 @@ import Produits from "./pages/Produits/Produits";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
 import Profile from "./pages/profile/Profile";
+import ForgotPassword from "./pages/ForgotPassword";
+import EmailSent from "./pages/EmailSent";
+import ResetPassword from "./pages/ResetPassword";
+import PasswordChanged from "./pages/PasswordChanged";
 
 function App() {
   return (
@@ -21,6 +25,10 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/email-sent" element={<EmailSent />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/password-changed" element={<PasswordChanged />} />
 
         {/* Routes protégées (pour l'instant sans authentification) */}
         <Route element={<MainLayout />}>

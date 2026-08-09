@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-
 import Modal from "../../components/ui/Modal";
+import Sheet from "../../components/ui/Sheet";
 import FactureForm from "../../components/factures/FactureForm";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
@@ -12,6 +12,7 @@ import FactureTable from "../../components/factures/FactureTable";
 import FactureSearch from "../../components/factures/FactureSearch";
 import FacturePreview from "../../components/factures/FacturePreview";
 import { generateInvoicePdf } from "../../utils/pdf/invoicePdf";
+import { useNotificationStore } from "../../store/notificationStore";
 
 export default function Factures() {
   const location = useLocation();
@@ -23,6 +24,10 @@ export default function Factures() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Toutes");
   const factures = useFactureStore((state) => state.factures);
+
+  const addNotification = useNotificationStore(
+  (state) => state.addNotification
+);
   const addFacture = useFactureStore((state) => state.addFacture);
 
   const updateFacture = useFactureStore((state) => state.updateFacture);
@@ -66,31 +71,94 @@ export default function Factures() {
   });
 
   function handleAddFacture(facture: Facture) {
-    addFacture(facture);
 
-    setIsOpen(false);
+  addFacture(facture);
 
-    toast.success("Facture créée avec succès !");
-  }
+
+  addNotification({
+
+    title: "Nouvelle facture créée",
+
+    message:
+      `La facture ${facture.numero} a été créée.`,
+
+   createdAt: Date.now(),
+
+    type: "facture",
+
+  });
+
+
+  setIsOpen(false);
+
+
+  toast.success("Facture créée avec succès !");
+
+}
 
   function handleUpdateFacture(updatedFacture: Facture) {
-    updateFacture(updatedFacture);
 
-    setEditingFacture(null);
+  updateFacture(updatedFacture);
 
-    setIsOpen(false);
 
-    toast.success("Facture modifiée avec succès !");
-  }
+  addNotification({
+
+    title: "Facture modifiée",
+
+    message:
+      `La facture ${updatedFacture.numero} a été modifiée.`,
+
+   createdAt: Date.now(),
+
+    type: "facture",
+
+  });
+
+
+  setEditingFacture(null);
+
+  setIsOpen(false);
+
+
+  toast.success("Facture modifiée avec succès !");
+
+}
 
   function handleDeleteFacture() {
-    if (factureToDelete === null) return;
 
-    deleteFacture(factureToDelete);
-    setDeleteDialog(false);
-    setFactureToDelete(null);
-    toast.success("Facture supprimée avec succès !");
-  }
+  if (factureToDelete === null) return;
+
+
+  const deletedFacture = factures.find(
+    (f) => f.id === factureToDelete
+  );
+
+
+  deleteFacture(factureToDelete);
+
+
+  addNotification({
+
+    title: "Facture supprimée",
+
+    message:
+      `La facture ${deletedFacture?.numero ?? ""} a été supprimée.`,
+
+    createdAt: Date.now(),
+
+    type: "facture",
+
+  });
+
+
+  setDeleteDialog(false);
+
+  setFactureToDelete(null);
+
+
+  toast.success("Facture supprimée avec succès !");
+
+}
 
   function handleStatusChange(id: number, statut: Facture["statut"]) {
     updateStatus(id, statut);
@@ -159,9 +227,10 @@ export default function Factures() {
         }}
         onStatusChange={handleStatusChange}
       />
-      <Modal
+      <Sheet
         isOpen={isOpen}
         title={editingFacture ? "Modifier la facture" : "Nouvelle facture"}
+        size="lg"
         onClose={() => setIsOpen(false)}
       >
         <FactureForm
@@ -186,7 +255,7 @@ export default function Factures() {
             setIsOpen(false);
           }}
         />
-      </Modal>
+      </Sheet>
       <Modal
         isOpen={previewOpen}
         title="Aperçu de la facture"

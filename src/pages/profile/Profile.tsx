@@ -7,9 +7,15 @@ import type { User } from "../../types/user";
 import { Pencil } from "lucide-react";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import { useNotificationStore } from "../../store/notificationStore";
 
 export default function Profile() {
   const user = useAuthStore((state) => state.user);
+
+  const addNotification =
+  useNotificationStore(
+    (state) => state.addNotification
+  );
 
   const updateAuthUser = useAuthStore((state) => state.updateUser);
 
@@ -137,6 +143,19 @@ export default function Profile() {
     updateStoredUser(updatedUser);
 
     toast.success("Profil mis à jour avec succès.");
+
+    addNotification({
+
+  title: "Profil mis à jour",
+
+  message:
+    "Vos informations personnelles ont été modifiées.",
+
+  createdAt: Date.now(),
+
+  type: "profil",
+
+});
 
     setAncienPassword("");
 

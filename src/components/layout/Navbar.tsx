@@ -1,5 +1,5 @@
 import { Bell, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useClientStore } from "../../store/clientStore";
@@ -7,11 +7,16 @@ import { useFactureStore } from "../../store/factureStore";
 import { useProduitStore } from "../../store/produitStore";
 import { useProformaStore } from "../../store/proformaStore";
 import { useAuthStore } from "../../store/authStore";
+import NotificationDropdown from "./NotificationDropdown";
+import { useNotificationStore } from "../../store/notificationStore";
 
 export default function Navbar() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
+
+  const [openNotifications, setOpenNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   const clients = useClientStore((state) => state.clients);
 
@@ -22,6 +27,14 @@ export default function Navbar() {
   const proformas = useProformaStore((state) => state.proformas);
 
   const user = useAuthStore((state) => state.user);
+
+  const notifications = useNotificationStore(
+  (state) => state.notifications
+);
+
+const unreadCount = notifications.filter(
+  (notification) => !notification.read
+).length;
 
   const clientResults = clients.filter((client) =>
     client.nom.toLowerCase().includes(search.toLowerCase()),
@@ -42,6 +55,29 @@ export default function Navbar() {
       proforma.numero.toLowerCase().includes(search.toLowerCase()) ||
       proforma.client.toLowerCase().includes(search.toLowerCase()),
   );
+
+  useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (
+      notificationRef.current &&
+      !notificationRef.current.contains(event.target as Node)
+    ) {
+      setOpenNotifications(false);
+    }
+  }
+  document.addEventListener(
+  "click",
+  handleClickOutside
+);
+  return () => {
+   document.removeEventListener(
+  "click",
+  handleClickOutside
+);
+
+  };
+
+}, []);
 
   return (
     <header className="flex items-center justify-between rounded-2xl bg-white px-6 py-4 shadow-sm">
@@ -197,11 +233,49 @@ export default function Navbar() {
       {/* Partie droite */}
       <div className="flex items-center gap-5">
         {/* Notifications */}
-        <button className="relative rounded-xl bg-slate-100 p-3 transition hover:bg-slate-200">
-          <Bell size={20} />
+       <div ref={notificationRef} className="relative">
 
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"></span>
-        </button>
+  <button
+    onClick={() =>
+      setOpenNotifications(!openNotifications)
+    }
+    className="relative rounded-xl bg-slate-100 p-3 transition hover:bg-slate-200"
+  >
+
+    <Bell size={20} />
+
+    {unreadCount > 0 && (
+
+      <span
+        className="
+          absolute
+          -right-1
+          -top-1
+          flex
+          h-5
+          min-w-[20px]
+          items-center
+          justify-center
+          rounded-full
+          bg-red-500
+          px-1
+          text-xs
+          font-bold
+          text-white
+        "
+      >
+        {unreadCount}
+      </span>
+
+    )}
+
+  </button>
+
+  {openNotifications && (
+    <NotificationDropdown />
+  )}
+
+</div>
 
         {/* Profil */}
         <div className="flex items-center gap-3">

@@ -32,4 +32,6 @@ export interface Proforma {
   statut: StatutProforma;
 
   notes?: string;
+
+   factureNumero?: string;
 }
