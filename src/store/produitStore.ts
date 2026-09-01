@@ -1,11 +1,12 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-import type { Produit } from "../types/produit";
-import { produits as initialProduits } from "../data/produits";
+import type { Produit } from '../types/produit';
 
 interface ProduitStore {
   produits: Produit[];
+
+  setProduits: (produits: Produit[]) => void;
 
   addProduit: (produit: Produit) => void;
 
@@ -17,29 +18,31 @@ interface ProduitStore {
 export const useProduitStore = create<ProduitStore>()(
   persist(
     (set) => ({
-  produits: initialProduits,
+      produits: [],
+      setProduits: (produits) =>
+  set({
+    produits,
+  }),
 
-  addProduit: (produit) =>
-    set((state) => ({
-      produits: [...state.produits, produit],
-    })),
+      addProduit: (produit) =>
+        set((state) => ({
+          produits: [...state.produits, produit],
+        })),
 
-  updateProduit: (produit) =>
-    set((state) => ({
-      produits: state.produits.map((p) =>
-        p.id === produit.id ? produit : p
-      ),
-    })),
+      updateProduit: (produit) =>
+        set((state) => ({
+          produits: state.produits.map((p) =>
+            p.id === produit.id ? produit : p,
+          ),
+        })),
 
-  deleteProduit: (id) =>
-    set((state) => ({
-      produits: state.produits.filter(
-        (p) => p.id !== id
-      ),
-    })),
+      deleteProduit: (id) =>
+        set((state) => ({
+          produits: state.produits.filter((p) => p.id !== id),
+        })),
     }),
     {
-      name: "produits-storage",
-    }
-  )
+      name: 'produits-storage',
+    },
+  ),
 );

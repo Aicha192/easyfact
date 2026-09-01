@@ -1,12 +1,12 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-import type { Facture } from "../types/facture";
-import { factures as initialFactures } from "../data/factures";
-
+import type { Facture } from '../types/facture';
 
 interface FactureStore {
   factures: Facture[];
+
+   setFactures: (factures: Facture[]) => void;
 
   addFacture: (facture: Facture) => void;
 
@@ -14,51 +14,49 @@ interface FactureStore {
 
   deleteFacture: (id: number) => void;
 
-  updateStatus: (
-    id: number,
-    statut: Facture["statut"]
-  ) => void;
+  updateStatus: (id: number, statut: Facture['statut']) => void;
 }
 
 export const useFactureStore = create<FactureStore>()(
   persist(
     (set) => ({
+      factures: [],
+      setFactures: (factures) =>
+  set({
+    factures,
+  }),
 
-  factures: initialFactures,
+      addFacture: (facture) =>
+        set((state) => ({
+          factures: [...state.factures, facture],
+        })),
 
-  addFacture: (facture) =>
-    set((state) => ({
-      factures: [...state.factures, facture],
-    })),
+      updateFacture: (facture) =>
+        set((state) => ({
+          factures: state.factures.map((f) =>
+            f.id === facture.id ? facture : f,
+          ),
+        })),
 
-  updateFacture: (facture) =>
-    set((state) => ({
-      factures: state.factures.map((f) =>
-        f.id === facture.id ? facture : f
-      ),
-    })),
+      deleteFacture: (id) =>
+        set((state) => ({
+          factures: state.factures.filter((f) => f.id !== id),
+        })),
 
-  deleteFacture: (id) =>
-    set((state) => ({
-      factures: state.factures.filter(
-        (f) => f.id !== id
-      ),
-    })),
-
-  updateStatus: (id, statut) =>
-    set((state) => ({
-      factures: state.factures.map((f) =>
-        f.id === id
-          ? {
-              ...f,
-              statut,
-            }
-          : f
-      ),
-    })),
+      updateStatus: (id, statut) =>
+        set((state) => ({
+          factures: state.factures.map((f) =>
+            f.id === id
+              ? {
+                  ...f,
+                  statut,
+                }
+              : f,
+          ),
+        })),
     }),
     {
-      name: "factures-storage",
-    }
-  )
+      name: 'factures-storage',
+    },
+  ),
 );

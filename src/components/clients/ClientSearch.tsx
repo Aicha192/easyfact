@@ -1,28 +1,24 @@
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
 
 interface ClientSearchProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-export default function ClientSearch({
-  value,
-  onChange,
-}: ClientSearchProps) {
- return (
-  <div className="relative w-full">
+export default function ClientSearch({ value, onChange }: ClientSearchProps) {
+  return (
+    <div className="relative w-full">
+      <Search
+        size={18}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+      />
 
-    <Search
-      size={18}
-      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-    />
-
-    <input
-      type="text"
-      placeholder="Rechercher un client..."
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="
+      <input
+        type="text"
+        placeholder="Rechercher un client..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="
         w-full
         rounded-xl
         border
@@ -37,8 +33,7 @@ export default function ClientSearch({
         focus:ring-2
         focus:ring-emerald-100
       "
-    />
-
-  </div>
-);
+      />
+    </div>
+  );
 }

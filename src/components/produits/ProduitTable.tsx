@@ -1,7 +1,7 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from 'lucide-react';
 
-import type { Produit } from "../../types/produit";
-import Badge from "../ui/Badge";
+import type { Produit } from '../../types/produit';
+import Badge from '../ui/Badge';
 
 interface Props {
   produits: Produit[];
@@ -11,8 +11,8 @@ interface Props {
 
 export default function ProduitTable({ produits, onEdit, onDelete }: Props) {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-      <table className="w-full">
+    <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <table className="w-full min-w-[900px]">
         <thead className="bg-slate-100">
           <tr>
             <th className="p-4 text-left">Référence</th>
@@ -34,25 +34,27 @@ export default function ProduitTable({ produits, onEdit, onDelete }: Props) {
         <tbody>
           {produits.map((produit) => (
             <tr key={produit.id} className="border-t hover:bg-slate-50">
-              <td className="p-4 font-medium">{produit.reference}</td>
+              <td className="whitespace-nowrap p-4 font-medium">
+                {produit.reference}
+              </td>
 
-              <td>{produit.nom}</td>
+              <td className="whitespace-nowrap">{produit.nom}</td>
 
-              <td>{produit.categorie}</td>
+              <td className="whitespace-nowrap">{produit.categorie}</td>
 
-              <td className="font-semibold text-emerald-700">
+              <td className="whitespace-nowrap font-semibold text-emerald-700">
                 {produit.prix.toLocaleString()} FCFA
               </td>
 
-              <td>{produit.unite}</td>
+              <td className="whitespace-nowrap">{produit.unite}</td>
 
-              <td>
-                <Badge color={produit.statut === "Actif" ? "green" : "red"}>
+              <td className="whitespace-nowrap">
+                <Badge color={produit.statut === 'Actif' ? 'green' : 'red'}>
                   {produit.statut}
                 </Badge>
               </td>
 
-              <td>
+              <td className="whitespace-nowrap">
                 <div className="flex gap-2">
                   <button
                     onClick={() => onEdit(produit)}

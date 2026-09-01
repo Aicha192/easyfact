@@ -1,7 +1,7 @@
-import Badge from "../ui/Badge";
-import { Pencil, Trash2 } from "lucide-react";
+import Badge from '../ui/Badge';
+import { Pencil, Trash2 } from 'lucide-react';
 
-import type { Client } from "../../types/client";
+import type { Client } from '../../types/client';
 
 interface Props {
   clients: Client[];
@@ -12,16 +12,16 @@ interface Props {
 export default function ClientTable({ clients, onEdit, onDelete }: Props) {
   function getInitials(name: string) {
     return name
-      .split(" ")
+      .split(' ')
       .map((word) => word[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-      <table className="w-full">
+    <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <table className="w-full min-w-[700px]">
         <thead className="bg-slate-100">
           <tr>
             <th className="p-4 text-left">Nom</th>
@@ -36,7 +36,7 @@ export default function ClientTable({ clients, onEdit, onDelete }: Props) {
         <tbody>
           {clients.map((client) => (
             <tr key={client.id} className="border-t hover:bg-slate-50">
-              <td className="p-4">
+              <td className="p-4 whitespace-nowrap">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 font-semibold text-emerald-700">
                     {getInitials(client.nom)}
@@ -50,17 +50,17 @@ export default function ClientTable({ clients, onEdit, onDelete }: Props) {
                 </div>
               </td>
 
-              <td>{client.telephone}</td>
+              <td className="whitespace-nowrap">{client.telephone}</td>
 
-              <td>{client.adresse}</td>
+              <td className="whitespace-nowrap">{client.adresse}</td>
 
               <td>
-                <Badge color={client.statut === "Actif" ? "green" : "red"}>
+                <Badge color={client.statut === 'Actif' ? 'green' : 'red'}>
                   {client.statut}
                 </Badge>
               </td>
 
-              <td>
+              <td className="whitespace-nowrap">
                 <div className="flex gap-2">
                   <button
                     onClick={() => onEdit(client)}

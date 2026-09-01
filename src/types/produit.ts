@@ -5,11 +5,11 @@ export interface Produit {
 
   nom: string;
 
-  categorie: "Produit" | "Service";
+  categorie: 'Produit' | 'Service';
 
   prix: number;
 
   unite: string;
 
-  statut: "Actif" | "Inactif";
+  statut: 'Actif' | 'Inactif';
 }

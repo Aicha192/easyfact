@@ -1,174 +1,54 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import Modal from "../../components/ui/Modal";
-import Sheet from "../../components/ui/Sheet";
-import FactureForm from "../../components/factures/FactureForm";
-import toast from "react-hot-toast";
-import ConfirmDialog from "../../components/common/ConfirmDialog";
-import type { Facture } from "../../types/facture";
-import { useFactureStore } from "../../store/factureStore";
-import FactureStats from "../../components/factures/FactureStats";
-import FactureTable from "../../components/factures/FactureTable";
-import FactureSearch from "../../components/factures/FactureSearch";
-import FacturePreview from "../../components/factures/FacturePreview";
-import { generateInvoicePdf } from "../../utils/pdf/invoicePdf";
-import { useNotificationStore } from "../../store/notificationStore";
+import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
+import Modal from '../../components/ui/Modal';
+import Sheet from '../../components/ui/Sheet';
+import FactureForm from '../../components/factures/FactureForm';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import FactureStats from '../../components/factures/FactureStats';
+import FactureTable from '../../components/factures/FactureTable';
+import FactureSearch from '../../components/factures/FactureSearch';
+import FacturePreview from '../../components/factures/FacturePreview';
+
+import { generateInvoicePdf } from '../../utils/pdf/invoicePdf';
+import { useFactures } from '../../hooks/useFactures';
 
 export default function Factures() {
   const location = useLocation();
+
+  const {
+    factures,
+    filteredFactures,
+
+    search,
+    setSearch,
+
+    statusFilter,
+    setStatusFilter,
+
+    setFactureToDelete,
+
+    editingFacture,
+    setEditingFacture,
+
+    previewFacture,
+    setPreviewFacture,
+
+    handleAddFacture,
+    handleUpdateFacture,
+    handleDeleteFacture,
+    handleStatusChange,
+  } = useFactures();
+
   const [isOpen, setIsOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
-
-  const [factureToDelete, setFactureToDelete] = useState<number | null>(null);
-  const [editingFacture, setEditingFacture] = useState<Facture | null>(null);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("Toutes");
-  const factures = useFactureStore((state) => state.factures);
-
-  const addNotification = useNotificationStore(
-  (state) => state.addNotification
-);
-  const addFacture = useFactureStore((state) => state.addFacture);
-
-  const updateFacture = useFactureStore((state) => state.updateFacture);
-
-  const deleteFacture = useFactureStore((state) => state.deleteFacture);
-
-  const updateStatus = useFactureStore((state) => state.updateStatus);
-  const [previewOpen, setPreviewOpen] = useState(false);
-
-  const [previewFacture, setPreviewFacture] = useState<Facture | null>(null);
-
-  useEffect(() => {
-
-  const previewId = location.state?.previewId;
-
-  if (!previewId) return;
-
-  const facture = factures.find(
-    (f) => f.id === previewId
+  const [previewOpen, setPreviewOpen] = useState(
+    Boolean(location.state?.previewId),
   );
-
-  if (facture) {
-
-    setPreviewFacture(facture);
-
-    setPreviewOpen(true);
-
-  }
-
-}, [location.state, factures]);
-
-  const filteredFactures = factures.filter((facture) => {
-    const matchesSearch =
-      facture.numero.toLowerCase().includes(search.toLowerCase()) ||
-      facture.client.toLowerCase().includes(search.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "Toutes" || facture.statut === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  function handleAddFacture(facture: Facture) {
-
-  addFacture(facture);
-
-
-  addNotification({
-
-    title: "Nouvelle facture créée",
-
-    message:
-      `La facture ${facture.numero} a été créée.`,
-
-   createdAt: Date.now(),
-
-    type: "facture",
-
-  });
-
-
-  setIsOpen(false);
-
-
-  toast.success("Facture créée avec succès !");
-
-}
-
-  function handleUpdateFacture(updatedFacture: Facture) {
-
-  updateFacture(updatedFacture);
-
-
-  addNotification({
-
-    title: "Facture modifiée",
-
-    message:
-      `La facture ${updatedFacture.numero} a été modifiée.`,
-
-   createdAt: Date.now(),
-
-    type: "facture",
-
-  });
-
-
-  setEditingFacture(null);
-
-  setIsOpen(false);
-
-
-  toast.success("Facture modifiée avec succès !");
-
-}
-
-  function handleDeleteFacture() {
-
-  if (factureToDelete === null) return;
-
-
-  const deletedFacture = factures.find(
-    (f) => f.id === factureToDelete
-  );
-
-
-  deleteFacture(factureToDelete);
-
-
-  addNotification({
-
-    title: "Facture supprimée",
-
-    message:
-      `La facture ${deletedFacture?.numero ?? ""} a été supprimée.`,
-
-    createdAt: Date.now(),
-
-    type: "facture",
-
-  });
-
-
-  setDeleteDialog(false);
-
-  setFactureToDelete(null);
-
-
-  toast.success("Facture supprimée avec succès !");
-
-}
-
-  function handleStatusChange(id: number, statut: Facture["statut"]) {
-    updateStatus(id, statut);
-
-    toast.success("Statut mis à jour !");
-  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold">Factures</h1>
 
@@ -188,15 +68,15 @@ export default function Factures() {
       <FactureSearch value={search} onChange={setSearch} />
 
       <div className="flex flex-wrap gap-3">
-        {["Toutes", "Brouillon", "Envoyée", "Payée", "En retard"].map(
+        {['Toutes', 'Brouillon', 'Envoyée', 'Payée', 'En retard'].map(
           (status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
                 statusFilter === status
-                  ? "bg-emerald-600 text-white"
-                  : "bg-white text-slate-600 hover:bg-slate-100"
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-white text-slate-600 hover:bg-slate-100'
               }`}
             >
               {status}
@@ -219,19 +99,23 @@ export default function Factures() {
           setFactureToDelete(facture.id);
           setDeleteDialog(true);
         }}
-        onPdf={(facture) => {
-          generateInvoicePdf(facture);
+        onPdf={async (facture) => {
+          await generateInvoicePdf(facture);
         }}
-        onPrint={(facture) => {
-          generateInvoicePdf(facture, "print");
+        onPrint={async (facture) => {
+          await generateInvoicePdf(facture, 'print');
         }}
         onStatusChange={handleStatusChange}
       />
+
       <Sheet
         isOpen={isOpen}
-        title={editingFacture ? "Modifier la facture" : "Nouvelle facture"}
+        title={editingFacture ? 'Modifier la facture' : 'Nouvelle facture'}
         size="lg"
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setEditingFacture(null);
+          setIsOpen(false);
+        }}
       >
         <FactureForm
           initialData={
@@ -243,23 +127,39 @@ export default function Factures() {
                   dateEmission: editingFacture.dateEmission,
                   dateEcheance: editingFacture.dateEcheance,
                   montantHT: editingFacture.montantHT,
-                  tva: editingFacture.tva,
+                  tva: 18,
                   statut: editingFacture.statut,
-                  notes: editingFacture.notes ?? "",
+                  notes: editingFacture.notes ?? '',
+                  items: editingFacture.items,
                 }
               : undefined
           }
-          onSubmit={editingFacture ? handleUpdateFacture : handleAddFacture}
+          onSubmit={
+            editingFacture
+              ? async (facture) => {
+                  await handleUpdateFacture(facture);
+                  setEditingFacture(null);
+                  setIsOpen(false);
+                }
+              : async (facture) => {
+                  await handleAddFacture(facture);
+                  setIsOpen(false);
+                }
+          }
           onCancel={() => {
             setEditingFacture(null);
             setIsOpen(false);
           }}
         />
       </Sheet>
+
       <Modal
         isOpen={previewOpen}
         title="Aperçu de la facture"
-        onClose={() => setPreviewOpen(false)}
+        onClose={() => {
+          setPreviewOpen(false);
+          setPreviewFacture(null);
+        }}
       >
         {previewFacture && (
           <FacturePreview
@@ -277,7 +177,10 @@ export default function Factures() {
           setDeleteDialog(false);
           setFactureToDelete(null);
         }}
-        onConfirm={handleDeleteFacture}
+        onConfirm={() => {
+          handleDeleteFacture();
+          setDeleteDialog(false);
+        }}
       />
     </div>
   );

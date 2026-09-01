@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface NumeroStore {
   factureCount: number;
@@ -33,7 +33,7 @@ export const useNumeroStore = create<NumeroStore>()(
         })),
     }),
     {
-      name: "easyfact-numeros",
+      name: 'easyfact-numeros',
     },
   ),
 );

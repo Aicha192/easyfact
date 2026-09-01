@@ -1,27 +1,24 @@
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
 
 interface FactureSearchProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-export default function FactureSearch({
-  value,
-  onChange,
-}: FactureSearchProps) {
- return (
-  <div className="relative w-full">
-    <Search
-      size={18}
-      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-    />
+export default function FactureSearch({ value, onChange }: FactureSearchProps) {
+  return (
+    <div className="relative w-full">
+      <Search
+        size={18}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+      />
 
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="Rechercher une facture..."
-      className="
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Rechercher une facture..."
+        className="
         w-full
         rounded-xl
         border
@@ -36,7 +33,7 @@ export default function FactureSearch({
         focus:ring-2
         focus:ring-emerald-100
       "
-    />
-  </div>
-);
+      />
+    </div>
+  );
 }

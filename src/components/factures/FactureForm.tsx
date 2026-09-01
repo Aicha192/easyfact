@@ -1,16 +1,24 @@
-import { useMemo, useState } from "react";
-import Select from "../ui/Select";
-import Textarea from "../ui/Textarea";
-import { clients } from "../../data/clients";
-import type { FactureItem } from "../../types/factureItem";
-import FactureItems from "./FactureItems";
-import { produits } from "../../data/produits";
-import { useNumeroStore } from "../../store/numeroStore";
-import { generateNumber } from "../../utils/numberGenerator";
-import type { Facture } from "../../types/facture";
-import type { FactureFormData } from "./FactureForm.types";
-import Input from "../ui/Input";
-import Button from "../ui/Button";
+import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { Produit } from '../../types/produit';
+import Select from '../ui/Select';
+import Textarea from '../ui/Textarea';
+import Input from '../ui/Input';
+import Button from '../ui/Button';
+import type { Client } from '../../types/client';
+import api from '../../lib/axios';
+import type { FactureItem } from '../../types/factureItem';
+import type { Facture } from '../../types/facture';
+import type { FactureFormData } from './FactureForm.types';
+import FactureItems from './FactureItems';
+import { useNumeroStore } from '../../store/numeroStore';
+import { generateNumber } from '../../utils/numberGenerator';
+
+import {
+  factureSchema,
+  type FactureFormSchema,
+} from '../../schemas/factureSchema';
 
 interface Props {
   initialData?: FactureFormData;
@@ -19,7 +27,7 @@ interface Props {
 }
 
 function formatDate(date: Date) {
-  return date.toISOString().split("T")[0];
+  return date.toISOString().split('T')[0];
 }
 
 export default function FactureForm({
@@ -33,48 +41,93 @@ export default function FactureForm({
 
   const nextFacture = useNumeroStore((state) => state.getNextFacture());
 
-  const incrementFacture = useNumeroStore(
-  (state) => state.incrementFacture
-);
+  const incrementFacture = useNumeroStore((state) => state.incrementFacture);
 
   const [items, setItems] = useState<FactureItem[]>([]);
 
-  const [form, setForm] = useState<FactureFormData>(
-    initialData ?? {
-      id: undefined,
-      client: "",
-      numero: generateNumber("FAC", nextFacture),
+const [clients, setClients] = useState<Client[]>([]);
+const [produits, setProduits] = useState<Produit[]>([]);
+
+useEffect(() => {
+  Promise.all([
+    api.get<Client[]>('http://localhost:3000/clients'),
+    api.get<Produit[]>('http://localhost:3000/produits'),
+  ])
+    .then(([clientsResponse, produitsResponse]) => {
+      setClients(clientsResponse.data);
+      setProduits(produitsResponse.data);
+    })
+    .catch((error) => {
+      console.error(
+        'Erreur lors de la récupération des clients et produits:',
+        error,
+      );
+    });
+}, []);
+
+  const defaultValues: FactureFormSchema = {
+    client: initialData?.client ?? '',
+    numero: initialData?.numero ?? generateNumber('FAC', nextFacture),
+    dateEmission: initialData?.dateEmission ?? today,
+    dateEcheance: initialData?.dateEcheance ?? nextMonth,
+    tva: initialData?.tva ?? 18,
+    statut: initialData?.statut ?? 'Brouillon',
+    notes: initialData?.notes ?? '',
+  };
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<FactureFormSchema>({
+    resolver: zodResolver(factureSchema),
+    defaultValues,
+  });
+
+  useEffect(() => {
+  if (initialData) {
+    reset({
+      client: initialData.client,
+      numero: initialData.numero,
+      dateEmission: initialData.dateEmission,
+      dateEcheance: initialData.dateEcheance,
+      tva: initialData.tva,
+      statut: initialData.statut,
+      notes: initialData.notes ?? '',
+    });
+
+    setItems(initialData.items ?? []);
+  } else {
+    reset({
+      client: '',
+      numero: generateNumber('FAC', nextFacture),
       dateEmission: today,
       dateEcheance: nextMonth,
-      montantHT: 0,
       tva: 18,
-      statut: "Brouillon",
-      notes: "",
-    },
-  );
+      statut: 'Brouillon',
+      notes: '',
+    });
 
-  // Calcul automatique du TTC
+    setItems([]);
+  }
+}, [initialData, nextFacture, nextMonth, reset, today]);
+
+  const clientValue = watch('client');
+  const tvaValue = watch('tva');
+  const statutValue = watch('statut');
+
+  const selectedClient = clients.find((client) => client.nom === clientValue);
+
   const sousTotalHT = useMemo(() => {
     return items.reduce((total, item) => total + item.total, 0);
   }, [items]);
 
   const montantTTC = useMemo(() => {
-    return sousTotalHT + (sousTotalHT * form.tva) / 100;
-  }, [sousTotalHT, form.tva]);
-  const selectedClient = clients.find((client) => client.nom === form.client);
-
-  function handleChange(
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
-  ) {
-    const { name, value } = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "montantHT" || name === "tva" ? Number(value) : value,
-    }));
-  }
+    return sousTotalHT + (sousTotalHT * tvaValue) / 100;
+  }, [sousTotalHT, tvaValue]);
 
   function handleItemChange(
     id: number,
@@ -90,7 +143,7 @@ export default function FactureForm({
           [field]: value,
         };
 
-        if (field === "designation") {
+        if (field === 'designation') {
           const produit = produits.find((p) => p.nom === value);
 
           if (produit) {
@@ -109,35 +162,33 @@ export default function FactureForm({
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
+  function handleFormSubmit(data: FactureFormSchema) {
     if (!initialData) {
-  incrementFacture();
-}
+      incrementFacture();
+    }
 
     onSubmit({
-      id: form.id ?? Date.now(),
+      id: initialData?.id ?? Date.now(),
 
-      numero: form.numero,
+      numero: data.numero,
 
-      client: form.client,
+      client: data.client,
 
       items,
 
-      dateEmission: form.dateEmission,
+      dateEmission: data.dateEmission,
 
-      dateEcheance: form.dateEcheance,
+      dateEcheance: data.dateEcheance,
 
       montantHT: sousTotalHT,
 
-      tva: form.tva,
+      tva: data.tva,
 
       montantTTC,
 
-      statut: form.statut,
+      statut: data.statut,
 
-      notes: form.notes,
+      notes: data.notes,
     });
   }
 
@@ -146,7 +197,7 @@ export default function FactureForm({
       ...prev,
       {
         id: Date.now(),
-        designation: "Nouveau produit",
+        designation: 'Nouveau produit',
         quantite: 1,
         prixUnitaire: 0,
         total: 0,
@@ -159,26 +210,38 @@ export default function FactureForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <h3 className="border-b pb-2 text-lg font-semibold text-slate-800">
         Informations générales
       </h3>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Select
-          label="Client"
-          name="client"
-          value={form.client}
-          onChange={handleChange}
-        >
-          <option value="">Sélectionner un client</option>
+        <div>
+          <Select
+  label="Client"
+  name="client"
+  value={clientValue}
+  defaultValue={clientValue}
+  onChange={(e) =>
+    setValue('client', e.target.value, {
+      shouldValidate: true,
+    })
+  }
+>
+            <option value="">Sélectionner un client</option>
 
-          {clients.map((client) => (
-            <option key={client.id} value={client.nom}>
-              {client.nom}
-            </option>
-          ))}
-        </Select>
+            {clients.map((client) => (
+              <option key={client.id} value={client.nom}>
+                {client.nom}
+              </option>
+            ))}
+          </Select>
+
+          {errors.client && (
+            <p className="mt-1 text-sm text-red-500">{errors.client.message}</p>
+          )}
+        </div>
+
         {selectedClient && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
             <h4 className="mb-3 font-semibold text-slate-700">
@@ -201,23 +264,41 @@ export default function FactureForm({
           </div>
         )}
 
-        <Input label="Numéro" name="numero" value={form.numero} readOnly />
+        <div>
+          <Input label="Numéro" {...register('numero')} readOnly />
 
-        <Input
-          label="Date d'émission"
-          type="date"
-          name="dateEmission"
-          value={form.dateEmission}
-          onChange={handleChange}
-        />
+          {errors.numero && (
+            <p className="mt-1 text-sm text-red-500">{errors.numero.message}</p>
+          )}
+        </div>
 
-        <Input
-          label="Date d'échéance"
-          type="date"
-          name="dateEcheance"
-          value={form.dateEcheance}
-          onChange={handleChange}
-        />
+        <div>
+          <Input
+            label="Date d'émission"
+            type="date"
+            {...register('dateEmission')}
+          />
+
+          {errors.dateEmission && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.dateEmission.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Input
+            label="Date d'échéance"
+            type="date"
+            {...register('dateEcheance')}
+          />
+
+          {errors.dateEcheance && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.dateEcheance.message}
+            </p>
+          )}
+        </div>
       </div>
 
       <h3 className="border-b pt-4 pb-2 text-lg font-semibold text-slate-800">
@@ -232,13 +313,17 @@ export default function FactureForm({
           className="bg-slate-100"
         />
 
-        <Input
-          label="TVA (%)"
-          name="tva"
-          type="number"
-          value={form.tva}
-          onChange={handleChange}
-        />
+        <div>
+          <Input
+            label="TVA (%)"
+            type="number"
+            {...register('tva', { valueAsNumber: true })}
+          />
+
+          {errors.tva && (
+            <p className="mt-1 text-sm text-red-500">{errors.tva.message}</p>
+          )}
+        </div>
 
         <Input
           label="Montant TTC"
@@ -247,17 +332,31 @@ export default function FactureForm({
           className="bg-slate-100"
         />
 
-        <Select
-          label="Statut"
-          name="statut"
-          value={form.statut}
-          onChange={handleChange}
-        >
-          <option value="Brouillon">Brouillon</option>
-          <option value="Envoyée">Envoyée</option>
-          <option value="Payée">Payée</option>
-          <option value="En retard">En retard</option>
-        </Select>
+        <div>
+          <Select
+            label="Statut"
+            name="statut"
+            value={statutValue}
+            onChange={(e) =>
+              setValue(
+                'statut',
+                e.target.value as FactureFormSchema['statut'],
+                {
+                  shouldValidate: true,
+                },
+              )
+            }
+          >
+            <option value="Brouillon">Brouillon</option>
+            <option value="Envoyée">Envoyée</option>
+            <option value="Payée">Payée</option>
+            <option value="En retard">En retard</option>
+          </Select>
+
+          {errors.statut && (
+            <p className="mt-1 text-sm text-red-500">{errors.statut.message}</p>
+          )}
+        </div>
       </div>
 
       <h3 className="border-b pt-4 pb-2 text-lg font-semibold text-slate-800">
@@ -266,9 +365,7 @@ export default function FactureForm({
 
       <Textarea
         label="Notes"
-        name="notes"
-        value={form.notes}
-        onChange={handleChange}
+        {...register('notes')}
         placeholder="Ajouter une remarque..."
       />
 
@@ -282,13 +379,15 @@ export default function FactureForm({
       <div className="mt-6 ml-auto w-full max-w-sm rounded-xl border bg-slate-50 p-4">
         <div className="flex justify-between py-2">
           <span>Sous-total HT</span>
+
           <strong>{sousTotalHT.toLocaleString()} FCFA</strong>
         </div>
 
         <div className="flex justify-between py-2">
-          <span>TVA ({form.tva}%)</span>
+          <span>TVA ({tvaValue}%)</span>
+
           <strong>
-            {((sousTotalHT * form.tva) / 100).toLocaleString()} FCFA
+            {((sousTotalHT * tvaValue) / 100).toLocaleString()} FCFA
           </strong>
         </div>
 
@@ -296,6 +395,7 @@ export default function FactureForm({
 
         <div className="flex justify-between text-lg font-bold text-emerald-600">
           <span>Total TTC</span>
+
           <span>{montantTTC.toLocaleString()} FCFA</span>
         </div>
       </div>
@@ -309,7 +409,7 @@ export default function FactureForm({
           Annuler
         </button>
 
-        <Button type="submit">{initialData ? "Enregistrer" : "Créer"}</Button>
+        <Button type="submit">{initialData ? 'Enregistrer' : 'Créer'}</Button>
       </div>
     </form>
   );

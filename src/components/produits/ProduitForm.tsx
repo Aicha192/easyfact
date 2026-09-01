@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import Button from "../ui/Button";
-import Input from "../ui/Input";
-import Select from "../ui/Select";
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Select from '../ui/Select';
 
-import type { Produit } from "../../types/produit";
+import type { Produit } from '../../types/produit';
 
 export interface ProduitFormData {
   reference: string;
   nom: string;
-  categorie: "Produit" | "Service";
+  categorie: 'Produit' | 'Service';
   prix: number;
   unite: string;
-  statut: "Actif" | "Inactif";
+  statut: 'Actif' | 'Inactif';
 }
 
 interface Props {
@@ -37,11 +37,11 @@ export default function ProduitForm({
   const [form, setForm] = useState<ProduitFormData>(
     initialData ?? {
       reference: generateReference(),
-      nom: "",
-      categorie: "Produit",
+      nom: '',
+      categorie: 'Produit',
       prix: 0,
-      unite: "Pièce",
-      statut: "Actif",
+      unite: 'Pièce',
+      statut: 'Actif',
     },
   );
 
@@ -53,7 +53,7 @@ export default function ProduitForm({
     setForm((prev) => ({
       ...prev,
 
-      [name]: name === "prix" ? Number(value) : value,
+      [name]: name === 'prix' ? Number(value) : value,
     }));
   }
 
@@ -64,7 +64,7 @@ export default function ProduitForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="flex min-w-0 flex-col gap-4">
       <Input
         label="Référence"
         name="reference"
@@ -120,16 +120,18 @@ export default function ProduitForm({
         <option value="Inactif">Inactif</option>
       </Select>
 
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl border px-5 py-2 hover:bg-slate-100"
+          className="w-full rounded-xl border px-5 py-2 hover:bg-slate-100 sm:w-auto"
         >
           Annuler
         </button>
 
-        <Button type="submit">{initialData ? "Enregistrer" : "Ajouter"}</Button>
+        <Button type="submit" className="w-full sm:w-auto">
+          {initialData ? 'Enregistrer' : 'Ajouter'}
+        </Button>
       </div>
     </form>
   );

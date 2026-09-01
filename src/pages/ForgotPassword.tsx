@@ -1,26 +1,26 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Mail } from "lucide-react";
-import toast from "react-hot-toast";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-import AuthLayout from "../layouts/AuthLayout";
-import Input from "../components/ui/Input";
-import Button from "../components/ui/Button";
+import AuthLayout from '../layouts/AuthLayout';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
 
   function handleSubmit() {
     if (!email.trim()) {
-      toast.error("Veuillez saisir votre adresse e-mail.");
+      toast.error('Veuillez saisir votre adresse e-mail.');
 
       return;
     }
 
     // Simulation d'envoi du lien
-    navigate("/email-sent", {
+    navigate('/email-sent', {
       state: {
         email,
       },
@@ -61,7 +61,9 @@ export default function ForgotPassword() {
           />
 
           <div className="mt-6">
-            <Button onClick={handleSubmit}>Continuer</Button>
+            <Button onClick={handleSubmit} className="w-full">
+              Continuer
+            </Button>
           </div>
         </div>
 

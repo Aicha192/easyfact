@@ -1,66 +1,67 @@
-import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, Phone, Lock } from "lucide-react";
+import { Link, useNavigate } from 'react-router-dom';
+import { User, Mail, Phone, Lock } from 'lucide-react';
 
-import AuthLayout from "../../layouts/AuthLayout";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
-import { useState } from "react";
-import toast from "react-hot-toast";
+import AuthLayout from '../../layouts/AuthLayout';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
-import { useUserStore } from "../../store/userStore";
+import api from '../../lib/axios';
 
 export default function Register() {
   const navigate = useNavigate();
 
-  const users = useUserStore((state) => state.users);
+  const [nom, setNom] = useState('');
 
-  const addUser = useUserStore((state) => state.addUser);
+  const [email, setEmail] = useState('');
 
-  const [nom, setNom] = useState("");
+  const [telephone, setTelephone] = useState('');
 
-  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState('');
 
-  const [telephone, setTelephone] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [password, setPassword] = useState("");
+async function handleRegister(e: React.FormEvent) {
+  e.preventDefault();
 
-  const [confirmPassword, setConfirmPassword] = useState("");
+  if (!nom || !email || !telephone || !password || !confirmPassword) {
+    toast.error('Veuillez remplir tous les champs.');
+    return;
+  }
 
-  function handleRegister(e: React.FormEvent) {
-    e.preventDefault();
+  if (password !== confirmPassword) {
+    toast.error('Les mots de passe ne correspondent pas.');
+    return;
+  }
 
-    if (!nom || !email || !telephone || !password || !confirmPassword) {
-      toast.error("Veuillez remplir tous les champs.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas.");
-      return;
-    }
-
-    const existingUser = users.find(
-      (user) => user.email.toLowerCase() === email.toLowerCase(),
-    );
-
-    if (existingUser) {
-      toast.error("Cette adresse e-mail est déjà utilisée.");
-      return;
-    }
-
-    addUser({
-      id: Date.now(),
+  try {
+    const response = await api.post('/auth/register', {
       nom,
       email,
       telephone,
       password,
-      role: "Utilisateur",
     });
 
-    toast.success("Compte créé avec succès !");
+    console.log('Inscription réussie depuis NestJS:', response.data);
 
-    navigate("/login");
+    toast.success('Compte créé avec succès !');
+
+    navigate('/login');
+  } catch (error: any) {
+    console.error("Erreur lors de l'inscription :", error);
+
+    const message = error?.response?.data?.message;
+
+    if (Array.isArray(message)) {
+      toast.error(message.join(', '));
+    } else if (message) {
+      toast.error(message);
+    } else {
+      toast.error("Impossible de créer le compte.");
+    }
   }
+}
 
   return (
     <AuthLayout>
@@ -120,7 +121,10 @@ export default function Register() {
 
         <p className="mt-6 text-center text-gray-600">
           Déjà un compte ?
-          <Link to="/login" className="ml-2 font-semibold text-emerald-600">
+          <Link
+            to="/login"
+            className="ml-1 font-semibold text-emerald-600 sm:ml-2"
+          >
             Se connecter
           </Link>
         </p>

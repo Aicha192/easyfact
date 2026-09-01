@@ -1,13 +1,12 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-import type { Proforma } from "../types/proforma";
-import { proformas as initialProformas } from "../data/proformas";
-
+import type { Proforma } from '../types/proforma';
 
 interface ProformaStore {
-
   proformas: Proforma[];
+
+  setProformas: (proformas: Proforma[]) => void;
 
   addProforma: (proforma: Proforma) => void;
 
@@ -15,46 +14,35 @@ interface ProformaStore {
 
   deleteProforma: (id: number) => void;
 
-  updateStatus: (
-    id: number,
-    statut: Proforma["statut"]
-  ) => void;
+  updateStatus: (id: number, statut: Proforma['statut']) => void;
 }
-
 
 export const useProformaStore = create<ProformaStore>()(
   persist(
     (set) => ({
+     proformas: [],
 
-     proformas: initialProformas,
-
+     setProformas: (proformas) =>
+  set({
+    proformas,
+  }),
 
       addProforma: (proforma) =>
         set((state) => ({
-          proformas: [
-            ...state.proformas,
-            proforma,
-          ],
+          proformas: [...state.proformas, proforma],
         })),
-
 
       updateProforma: (proforma) =>
         set((state) => ({
           proformas: state.proformas.map((p) =>
-            p.id === proforma.id
-              ? proforma
-              : p
+            p.id === proforma.id ? proforma : p,
           ),
         })),
-
 
       deleteProforma: (id) =>
         set((state) => ({
-          proformas: state.proformas.filter(
-            (p) => p.id !== id
-          ),
+          proformas: state.proformas.filter((p) => p.id !== id),
         })),
-
 
       updateStatus: (id, statut) =>
         set((state) => ({
@@ -64,15 +52,13 @@ export const useProformaStore = create<ProformaStore>()(
                   ...p,
                   statut,
                 }
-              : p
+              : p,
           ),
         })),
-
     }),
 
     {
-      name: "proformas-storage",
-    }
-
-  )
+      name: 'proformas-storage',
+    },
+  ),
 );

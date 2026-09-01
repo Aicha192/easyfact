@@ -1,48 +1,50 @@
-import { Link } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
-import AuthLayout from "../../layouts/AuthLayout";
-import toast from "react-hot-toast";
-import { useUserStore } from "../../store/userStore";
-import { useAuthStore } from "../../store/authStore";
-import { useNavigate } from "react-router-dom";
-import { useNotificationStore } from "../../store/notificationStore";
+import { Link } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import axios from 'axios';
+import AuthLayout from '../../layouts/AuthLayout';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../../store/authStore';
+import { useNavigate } from 'react-router-dom';
+import { useNotificationStore } from '../../store/notificationStore';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const users = useUserStore((state) => state.users);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const login = useAuthStore((state) => state.login);
   const addNotification = useNotificationStore(
-  (state) => state.addNotification
-);
+    (state) => state.addNotification,
+  );
   const navigate = useNavigate();
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
 
-    const user = users.find(
-      (u) => u.email === email && u.password === password,
-    );
+    try {
+      const response = await axios.post('http://localhost:3000/auth/login', {
+        email,
+        password,
+      });
 
-    if (!user) {
-      toast.error("Email ou mot de passe incorrect.");
+      console.log('JWT reçu depuis NestJS:', response.data.access_token);
 
-      return;
+      const user = response.data.user;
+
+      toast.success(`Bienvenue ${user.nom} !`);
+     login(user, response.data.access_token);
+
+      addNotification({
+        title: 'Connexion réussie',
+        message: `Bienvenue ${user.nom} !`,
+        createdAt: Date.now(),
+        type: 'auth',
+      });
+
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error('Email ou mot de passe incorrect.');
     }
-
-    toast.success(`Bienvenue ${user.nom} !`);
-    login(user);
-
-    addNotification({
-  title: "Connexion réussie",
-  message: `Bienvenue ${user.nom} !`,
- createdAt: Date.now(),
-  type: "auth",
-});
-
-    navigate("/dashboard");
   }
 
   return (
@@ -89,7 +91,7 @@ export default function Login() {
               />
 
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="********"
@@ -107,7 +109,7 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <label className="flex items-center gap-2 text-sm text-gray-600">
               <input type="checkbox" className="accent-emerald-600" />
               Se souvenir de moi
@@ -145,7 +147,10 @@ export default function Login() {
 
         <p className="mt-6 text-center text-gray-600">
           Pas encore de compte ?
-          <Link to="/register" className="ml-2 font-semibold text-emerald-600">
+          <Link
+            to="/register"
+            className="ml-1 font-semibold text-emerald-600 sm:ml-2"
+          >
             S'inscrire
           </Link>
         </p>

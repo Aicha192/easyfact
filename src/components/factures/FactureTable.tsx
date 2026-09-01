@@ -1,7 +1,6 @@
-import { FileDown, Pencil, Trash2, Eye } from "lucide-react";
-import { Printer } from "lucide-react";
-import type { Facture } from "../../types/facture";
-import Badge from "../ui/Badge";
+import { FileDown, Pencil, Trash2, Eye } from 'lucide-react';
+import { Printer } from 'lucide-react';
+import type { Facture } from '../../types/facture';
 
 interface Props {
   factures: Facture[];
@@ -12,7 +11,7 @@ interface Props {
 
   onPreview: (facture: Facture) => void;
 
-  onStatusChange: (id: number, statut: Facture["statut"]) => void;
+  onStatusChange: (id: number, statut: Facture['statut']) => void;
 
   onPdf: (facture: Facture) => void;
 
@@ -28,28 +27,9 @@ export default function FactureTable({
   onPdf,
   onPrint,
 }: Props) {
-  function getStatusColor(statut: Facture["statut"]) {
-    switch (statut) {
-      case "Payée":
-        return "green";
-
-      case "Envoyée":
-        return "blue";
-
-      case "En retard":
-        return "red";
-
-      case "Brouillon":
-        return "gray";
-
-      default:
-        return "gray";
-    }
-  }
-
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-      <table className="w-full">
+    <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <table className="w-full min-w-[900px]">
         <thead className="bg-slate-100">
           <tr>
             <th className="p-4 text-left">Facture</th>
@@ -69,23 +49,27 @@ export default function FactureTable({
         <tbody>
           {factures.map((facture) => (
             <tr key={facture.id} className="border-t hover:bg-slate-50">
-              <td className="p-4 font-semibold">{facture.numero}</td>
+              <td className="whitespace-nowrap p-4 font-semibold">
+                {facture.numero}
+              </td>
 
-              <td>{facture.client}</td>
+              <td className="whitespace-nowrap">{facture.client}</td>
 
-              <td>{facture.dateEmission}</td>
+              <td className="whitespace-nowrap">
+                {new Date(facture.dateEmission).toLocaleDateString('fr-FR')}
+              </td>
 
-              <td className="font-medium">
+              <td className="whitespace-nowrap font-medium">
                 {facture.montantTTC.toLocaleString()} FCFA
               </td>
 
-              <td>
+              <td className="whitespace-nowrap">
                 <select
                   value={facture.statut}
                   onChange={(e) =>
                     onStatusChange(
                       facture.id,
-                      e.target.value as Facture["statut"],
+                      e.target.value as Facture['statut'],
                     )
                   }
                   className="rounded-lg border border-slate-300 px-2 py-1 text-sm focus:border-emerald-600 focus:outline-none"

@@ -1,14 +1,11 @@
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
 
 interface Props {
   value: string;
   onChange: (value: string) => void;
 }
 
-export default function ProduitSearch({
-  value,
-  onChange,
-}: Props) {
+export default function ProduitSearch({ value, onChange }: Props) {
   return (
     <div className="relative">
       <Search

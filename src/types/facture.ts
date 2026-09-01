@@ -1,23 +1,15 @@
-import type { FactureItem } from "./factureItem";
+import type { FactureItem } from './factureItem';
 
-export type StatutFacture =
-  | "Brouillon"
-  | "Envoyée"
-  | "Payée"
-  | "En retard";
-
-  
-
+export type StatutFacture = 'Brouillon' | 'Envoyée' | 'Payée' | 'En retard';
 
 export interface Facture {
-
   id: number;
 
   numero: string;
 
   client: string;
 
-   items: FactureItem[];
+  items: FactureItem[];
 
   dateEmission: string;
 
@@ -31,6 +23,5 @@ export interface Facture {
 
   statut: StatutFacture;
 
-    notes?: string;
-
+  notes?: string;
 }

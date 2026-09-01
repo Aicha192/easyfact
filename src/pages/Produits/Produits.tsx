@@ -1,37 +1,46 @@
-import { useState } from "react";
-
-import Sheet from "../../components/ui/Sheet";
-import ConfirmDialog from "../../components/common/ConfirmDialog";
-import ProduitStats from "../../components/produits/ProduitStats";
-import ProduitForm from "../../components/produits/ProduitForm";
-import ProduitTable from "../../components/produits/ProduitTable";
-import ProduitSearch from "../../components/produits/ProduitSearch";
-import type { ProduitFormData } from "../../components/produits/ProduitForm";
-import { useNotificationStore } from "../../store/notificationStore";
-import { useProduitStore } from "../../store/produitStore";
-import type { Produit } from "../../types/produit";
-import toast from "react-hot-toast";
+import { useEffect, useState } from 'react';
+import api from '../../lib/axios';
+import Sheet from '../../components/ui/Sheet';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import ProduitStats from '../../components/produits/ProduitStats';
+import ProduitForm from '../../components/produits/ProduitForm';
+import ProduitTable from '../../components/produits/ProduitTable';
+import ProduitSearch from '../../components/produits/ProduitSearch';
+import type { ProduitFormData } from '../../components/produits/ProduitForm';
+import { useNotificationStore } from '../../store/notificationStore';
+import { useProduitStore } from '../../store/produitStore';
+import type { Produit } from '../../types/produit';
+import toast from 'react-hot-toast';
 
 export default function Produits() {
-  const produitList = useProduitStore(
-  (state) => state.produits
-);
+  const produitList = useProduitStore((state) => state.produits);
 
-const addNotification = useNotificationStore(
-  (state) => state.addNotification
-);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification,
+  );
 
-const addProduit = useProduitStore(
-  (state) => state.addProduit
-);
+  const setProduits = useProduitStore((state) => state.setProduits);
 
-const updateProduit = useProduitStore(
-  (state) => state.updateProduit
-);
+useEffect(() => {
+  api
+    .get<Produit[]>('/produits')
+    .then((response) => {
+      console.log('Produits récupérés depuis NestJS:', response.data);
+      setProduits(response.data);
+    })
+    .catch((error) => {
+      console.error(
+        'Erreur lors de la récupération des produits:',
+        error,
+      );
+    });
+}, [setProduits]);
 
-const deleteProduit = useProduitStore(
-  (state) => state.deleteProduit
-);
+  const addProduit = useProduitStore((state) => state.addProduit);
+
+  const updateProduit = useProduitStore((state) => state.updateProduit);
+
+  const deleteProduit = useProduitStore((state) => state.deleteProduit);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -41,7 +50,7 @@ const deleteProduit = useProduitStore(
 
   const [produitToDelete, setProduitToDelete] = useState<number | null>(null);
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const filteredProduits = produitList.filter(
     (produit) =>
@@ -49,29 +58,37 @@ const deleteProduit = useProduitStore(
       produit.reference.toLowerCase().includes(search.toLowerCase()),
   );
 
-  function handleAddProduit(data: ProduitFormData) {
+ async function handleAddProduit(data: ProduitFormData) {
+  try {
+    const response = await api.post('/produits', data);
 
-  const newProduit: Produit = {
-    id: Date.now(),
-    ...data,
-  };
+    console.log('Produit créé depuis NestJS:', response.data);
 
-  addProduit(newProduit);
+    const newProduit: Produit = response.data.produit;
 
-  addNotification({
-    title: "Nouveau produit ajouté",
-    message: `${newProduit.nom} a été ajouté au catalogue.`,
-   createdAt: Date.now(),
-    type: "produit",
-  });
+    addProduit(newProduit);
 
-  setIsOpen(false);
+    addNotification({
+      title: 'Nouveau produit ajouté',
+      message: `${newProduit.nom} a été ajouté au catalogue.`,
+      createdAt: Date.now(),
+      type: 'produit',
+    });
 
-  toast.success("Produit ajouté avec succès !");
+    setIsOpen(false);
+
+    toast.success('Produit ajouté avec succès !');
+  } catch (error) {
+    console.error(
+      'Erreur lors de la création du produit:',
+      error,
+    );
+
+    toast.error('Impossible de créer le produit.');
+  }
 }
 
-  function handleUpdateProduit(data: ProduitFormData) {
-
+  async function handleUpdateProduit(data: ProduitFormData) {
   if (!editingProduit) return;
 
   const updatedProduit = {
@@ -79,44 +96,71 @@ const deleteProduit = useProduitStore(
     ...data,
   };
 
-  updateProduit(updatedProduit);
+  try {
+    const response = await api.put(
+  `/produits/${updatedProduit.id}`,
+  updatedProduit,
+);
 
-  addNotification({
-    title: "Produit modifié",
-    message: `${updatedProduit.nom} a été modifié.`,
-    createdAt: Date.now(),
-    type: "produit",
-  });
+    console.log('Produit modifié depuis NestJS:', response.data);
 
-  setEditingProduit(null);
+    const produitModifie: Produit = response.data.produit;
 
-  setIsOpen(false);
+    updateProduit(produitModifie);
 
-  toast.success("Produit modifié avec succès !");
+    addNotification({
+      title: 'Produit modifié',
+      message: `${produitModifie.nom} a été modifié.`,
+      createdAt: Date.now(),
+      type: 'produit',
+    });
+
+    setEditingProduit(null);
+    setIsOpen(false);
+
+    toast.success('Produit modifié avec succès !');
+  } catch (error) {
+    console.error(
+      'Erreur lors de la modification du produit:',
+      error,
+    );
+
+    toast.error('Impossible de modifier le produit.');
+  }
 }
-
-  function handleDeleteProduit() {
-
+  async function handleDeleteProduit() {
   if (produitToDelete === null) return;
 
   const deletedProduit = produitList.find(
-    (produit) => produit.id === produitToDelete
+    (produit) => produit.id === produitToDelete,
   );
 
-  deleteProduit(produitToDelete);
+  try {
+    const response = await api.delete(`/produits/${produitToDelete}`);
 
-  addNotification({
-    title: "Produit supprimé",
-    message: `${deletedProduit?.nom ?? "Le produit"} a été supprimé.`,
-    createdAt: Date.now(),
-    type: "produit",
-  });
+    console.log('Produit supprimé depuis NestJS:', response.data);
 
-  setDeleteDialog(false);
+    deleteProduit(produitToDelete);
 
-  setProduitToDelete(null);
+    addNotification({
+      title: 'Produit supprimé',
+      message: `${deletedProduit?.nom ?? 'Le produit'} a été supprimé.`,
+      createdAt: Date.now(),
+      type: 'produit',
+    });
 
-  toast.success("Produit supprimé avec succès !");
+    setDeleteDialog(false);
+    setProduitToDelete(null);
+
+    toast.success('Produit supprimé avec succès !');
+  } catch (error) {
+    console.error(
+      'Erreur lors de la suppression du produit:',
+      error,
+    );
+
+    toast.error('Impossible de supprimer le produit.');
+  }
 }
 
   return (
@@ -158,7 +202,7 @@ const deleteProduit = useProduitStore(
 
       <Sheet
         isOpen={isOpen}
-        title={editingProduit ? "Modifier le produit" : "Nouveau produit"}
+        title={editingProduit ? 'Modifier le produit' : 'Nouveau produit'}
         size="md"
         onClose={() => {
           setEditingProduit(null);

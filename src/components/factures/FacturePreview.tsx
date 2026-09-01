@@ -1,8 +1,10 @@
-import type { Facture } from "../../types/facture";
-import type { FactureItem } from "../../types/factureItem";
-import { useParametresStore } from "../../store/parametresStore";
-import { clients } from "../../data/clients";
-import { Printer } from "lucide-react";
+import type { Facture } from '../../types/facture';
+import type { FactureItem } from '../../types/factureItem';
+import { useParametresStore } from '../../store/parametresStore';
+import { useEffect, useState } from 'react';
+import type { Client } from '../../types/client';
+import api from '../../lib/axios';
+import { Printer } from 'lucide-react';
 
 interface Props {
   facture: Facture;
@@ -10,6 +12,22 @@ interface Props {
 }
 
 export default function FacturePreview({ facture, items }: Props) {
+    const [clients, setClients] = useState<Client[]>([]);
+
+  useEffect(() => {
+    api
+      .get<Client[]>('/clients')
+      .then((response) => {
+        setClients(response.data);
+      })
+      .catch((error) => {
+        console.error(
+          'Erreur lors de la récupération des clients :',
+          error,
+        );
+      });
+  }, []);
+  
   function handlePrint() {
     window.print();
   }
@@ -19,7 +37,7 @@ export default function FacturePreview({ facture, items }: Props) {
   const client = clients.find((c) => c.nom === facture.client);
 
   return (
-   <div className="print-area space-y-6">
+    <div className="print-area space-y-6">
       <div className="flex justify-end">
         <button
           onClick={handlePrint}
@@ -53,7 +71,7 @@ export default function FacturePreview({ facture, items }: Props) {
 
         <div>
           <h2 className="text-2xl font-bold text-emerald-600">
-            {entreprise.nomEntreprise || "EasyFact"}
+            {entreprise.nomEntreprise || 'EasyFact'}
           </h2>
 
           <p className="text-sm text-slate-500">{entreprise.adresse}</p>
@@ -127,11 +145,11 @@ export default function FacturePreview({ facture, items }: Props) {
               <td className="text-center">{item.quantite}</td>
 
               <td className="text-center">
-                {item.prixUnitaire.toLocaleString("fr-FR")} FCFA
+                {item.prixUnitaire.toLocaleString('fr-FR')} FCFA
               </td>
 
               <td className="text-center font-medium">
-                {item.total.toLocaleString("fr-FR")} FCFA
+                {item.total.toLocaleString('fr-FR')} FCFA
               </td>
             </tr>
           ))}
@@ -145,7 +163,7 @@ export default function FacturePreview({ facture, items }: Props) {
           <div className="flex justify-between">
             <span>Sous-total HT</span>
 
-            <strong>{facture.montantHT.toLocaleString("fr-FR")} FCFA</strong>
+            <strong>{facture.montantHT.toLocaleString('fr-FR')} FCFA</strong>
           </div>
 
           <div className="flex justify-between">
@@ -153,8 +171,8 @@ export default function FacturePreview({ facture, items }: Props) {
 
             <strong>
               {((facture.montantHT * facture.tva) / 100).toLocaleString(
-                "fr-FR",
-              )}{" "}
+                'fr-FR',
+              )}{' '}
               FCFA
             </strong>
           </div>
@@ -162,7 +180,7 @@ export default function FacturePreview({ facture, items }: Props) {
           <div className="border-t pt-3 flex justify-between text-lg font-bold text-emerald-600">
             <span>Total TTC</span>
 
-            <span>{facture.montantTTC.toLocaleString("fr-FR")} FCFA</span>
+            <span>{facture.montantTTC.toLocaleString('fr-FR')} FCFA</span>
           </div>
         </div>
       </div>

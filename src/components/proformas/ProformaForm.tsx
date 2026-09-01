@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import type { Proforma } from "../../types/proforma";
-import type { FactureItem } from "../../types/factureItem";
-import FactureItems from "../factures/FactureItems";
+import type { Proforma } from '../../types/proforma';
+import type { FactureItem } from '../../types/factureItem';
+import FactureItems from '../factures/FactureItems';
 
 interface Props {
   initialData?: Proforma;
@@ -20,18 +20,21 @@ export default function ProformaForm({
   const [form, setForm] = useState({
     numero: initialData?.numero ?? `PRO-${Date.now()}`,
 
-    client: initialData?.client ?? "",
+    client: initialData?.client ?? '',
 
     dateEmission:
-      initialData?.dateEmission ?? new Date().toLocaleDateString("fr-FR"),
+  initialData?.dateEmission ??
+  new Date().toISOString().split('T')[0],
 
-    dateValidite: initialData?.dateValidite ?? "",
+   dateValidite:
+  initialData?.dateValidite ??
+  new Date().toISOString().split('T')[0],
 
     tva: initialData?.tva ?? 18,
 
-    statut: initialData?.statut ?? "Brouillon",
+    statut: initialData?.statut ?? 'Brouillon',
 
-    notes: initialData?.notes ?? "",
+    notes: initialData?.notes ?? '',
   });
 
   const [items, setItems] = useState<FactureItem[]>(initialData?.items ?? []);
@@ -40,7 +43,7 @@ export default function ProformaForm({
       ...items,
       {
         id: Date.now(),
-        designation: "",
+        designation: '',
         quantite: 1,
         prixUnitaire: 0,
         total: 0,
@@ -106,7 +109,7 @@ export default function ProformaForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="flex min-w-0 flex-col gap-5">
       <input
         className="w-full rounded-lg border p-3"
         placeholder="Client"
@@ -150,11 +153,11 @@ export default function ProformaForm({
         }
       />
 
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border px-4 py-2"
+          className="w-full rounded-lg border px-4 py-2 sm:w-auto"
         >
           Annuler
         </button>
@@ -162,11 +165,14 @@ export default function ProformaForm({
         <button
           type="submit"
           className="
-          rounded-lg
-          bg-emerald-600
-          px-4 py-2
-          text-white
-          "
+    w-full
+    rounded-lg
+    bg-emerald-600
+    px-4
+    py-2
+    text-white
+    sm:w-auto
+  "
         >
           Enregistrer
         </button>

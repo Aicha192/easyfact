@@ -1,13 +1,13 @@
-import { X } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 interface SheetProps {
   isOpen: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export default function Sheet({
@@ -15,14 +15,11 @@ export default function Sheet({
   title,
   onClose,
   children,
-   size = "md",
+  size = 'md',
 }: SheetProps) {
-
   const [show, setShow] = useState(false);
 
-
   useEffect(() => {
-
     if (isOpen) {
       setShow(true);
     } else {
@@ -32,17 +29,15 @@ export default function Sheet({
 
       return () => clearTimeout(timer);
     }
-
   }, [isOpen]);
-
 
   if (!show) return null;
 
   const sizeClasses = {
-  sm: "max-w-md",
-  md: "max-w-xl",
-  lg: "max-w-2xl",
-};
+    sm: 'max-w-md',
+    md: 'max-w-xl',
+    lg: 'max-w-2xl',
+  };
 
   return (
     <div
@@ -53,15 +48,10 @@ export default function Sheet({
         bg-black/40
         transition-opacity
         duration-300
-        ${
-          isOpen
-            ? "opacity-100"
-            : "opacity-0"
-        }
+        ${isOpen ? 'opacity-100' : 'opacity-0'}
       `}
       onClick={onClose}
     >
-
       <div
         className={`
           fixed
@@ -75,16 +65,10 @@ export default function Sheet({
           transition-transform
           duration-300
           ease-in-out
-          ${
-            isOpen
-              ? "translate-x-0"
-              : "translate-x-full"
-          }
+          ${isOpen ? 'translate-x-0' : 'translate-x-full'}
         `}
         onClick={(e) => e.stopPropagation()}
       >
-
-
         {/* Header */}
 
         <div
@@ -97,11 +81,7 @@ export default function Sheet({
             py-5
           "
         >
-
-          <h2 className="text-xl font-bold text-slate-800">
-            {title}
-          </h2>
-
+          <h2 className="text-xl font-bold text-slate-800">{title}</h2>
 
           <button
             onClick={onClose}
@@ -112,11 +92,9 @@ export default function Sheet({
               hover:bg-slate-100
             "
           >
-            <X size={22}/>
+            <X size={22} />
           </button>
-
         </div>
-
 
         {/* Contenu */}
 
@@ -129,10 +107,7 @@ export default function Sheet({
         >
           {children}
         </div>
-
-
       </div>
-
     </div>
   );
 }

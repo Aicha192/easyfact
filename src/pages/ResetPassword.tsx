@@ -1,60 +1,56 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Lock } from "lucide-react";
-import toast from "react-hot-toast";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Lock } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-import AuthLayout from "../layouts/AuthLayout";
-import Input from "../components/ui/Input";
-import Button from "../components/ui/Button";
-import { useNotificationStore } from "../store/notificationStore";
-
+import AuthLayout from '../layouts/AuthLayout';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import { useNotificationStore } from '../store/notificationStore';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
 
   const addNotification = useNotificationStore(
-    (state) => state.addNotification
+    (state) => state.addNotification,
   );
 
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState('');
 
-  const [confirmation, setConfirmation] = useState("");
+  const [confirmation, setConfirmation] = useState('');
 
   function handleSubmit() {
     if (!password.trim()) {
-      toast.error("Veuillez saisir un nouveau mot de passe.");
+      toast.error('Veuillez saisir un nouveau mot de passe.');
 
       return;
     }
 
     if (password.length < 6) {
-      toast.error("Le mot de passe doit contenir au moins 6 caractères.");
+      toast.error('Le mot de passe doit contenir au moins 6 caractères.');
 
       return;
     }
 
     if (password !== confirmation) {
-      toast.error("Les mots de passe ne correspondent pas.");
+      toast.error('Les mots de passe ne correspondent pas.');
 
       return;
     }
 
-    toast.success("Mot de passe modifié avec succès.");
+    toast.success('Mot de passe modifié avec succès.');
 
     addNotification({
+      title: 'Mot de passe modifié',
 
-  title: "Mot de passe modifié",
+      message: 'Votre mot de passe a été changé avec succès.',
 
-  message:
-    "Votre mot de passe a été changé avec succès.",
+      createdAt: Date.now(),
 
- createdAt: Date.now(),
+      type: 'auth',
+    });
 
-  type: "auth",
-
-});
-
-    navigate("/password-changed");
+    navigate('/password-changed');
   }
 
   return (

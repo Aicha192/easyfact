@@ -1,7 +1,7 @@
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from 'lucide-react';
 
-import type { FactureItem } from "../../types/factureItem";
-import { useProduitStore } from "../../store/produitStore";
+import type { FactureItem } from '../../types/factureItem';
+import { useProduitStore } from '../../store/produitStore';
 
 interface Props {
   items: FactureItem[];
@@ -23,9 +23,7 @@ export default function FactureItems({
   onDelete,
   onChange,
 }: Props) {
-const produits = useProduitStore(
-  (state) => state.produits
-);
+  const produits = useProduitStore((state) => state.produits);
 
   return (
     <div className="space-y-4">
@@ -61,7 +59,7 @@ const produits = useProduitStore(
                   <select
                     value={item.designation}
                     onChange={(e) =>
-                      onChange(item.id, "designation", e.target.value)
+                      onChange(item.id, 'designation', e.target.value)
                     }
                     className="w-full rounded-lg border p-2"
                   >
@@ -81,7 +79,7 @@ const produits = useProduitStore(
                     min={1}
                     value={item.quantite}
                     onChange={(e) =>
-                      onChange(item.id, "quantite", Number(e.target.value))
+                      onChange(item.id, 'quantite', Number(e.target.value))
                     }
                     className="w-20 rounded-lg border p-2"
                   />
@@ -93,7 +91,7 @@ const produits = useProduitStore(
                     min={0}
                     value={item.prixUnitaire}
                     onChange={(e) =>
-                      onChange(item.id, "prixUnitaire", Number(e.target.value))
+                      onChange(item.id, 'prixUnitaire', Number(e.target.value))
                     }
                     className="w-32 rounded-lg border p-2"
                   />

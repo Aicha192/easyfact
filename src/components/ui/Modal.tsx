@@ -1,5 +1,5 @@
-import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import { X } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,14 +18,9 @@ export default function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-
       <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-
         <div className="flex items-center justify-between border-b p-5">
-
-          <h2 className="text-xl font-bold">
-            {title}
-          </h2>
+          <h2 className="text-xl font-bold">{title}</h2>
 
           <button
             onClick={onClose}
@@ -33,15 +28,10 @@ export default function Modal({
           >
             <X size={22} />
           </button>
-
         </div>
 
-        <div className="p-6">
-          {children}
-        </div>
-
+        <div className="p-6">{children}</div>
       </div>
-
     </div>
   );
 }

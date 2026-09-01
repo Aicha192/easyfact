@@ -1,57 +1,46 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-import type { ParametresEntreprise } from "../types/parametres";
+import type { ParametresEntreprise } from '../types/parametres';
 
 interface ParametresStore {
-
   parametres: ParametresEntreprise;
 
-  updateParametres: (
-    parametres: ParametresEntreprise
-  ) => void;
-
+  updateParametres: (parametres: ParametresEntreprise) => void;
 }
 
-export const useParametresStore =
-  create<ParametresStore>()(
-    persist(
-      (set) => ({
+export const useParametresStore = create<ParametresStore>()(
+  persist(
+    (set) => ({
+      parametres: {
+        nomEntreprise: 'EasyFact',
 
-       parametres: {
+        responsable: '',
 
-  nomEntreprise: "EasyFact",
+        adresse: '',
 
-  responsable: "",
+        telephone: '',
 
-  adresse: "",
+        email: '',
 
-  telephone: "",
+        siteWeb: '',
 
-  email: "",
+        ninea: '',
 
-  siteWeb: "",
+        rccm: '',
 
-  ninea: "",
+        devise: 'FCFA',
 
-  rccm: "",
+        conditionsPaiement: 'Paiement à réception',
 
-  devise: "FCFA",
+        logo: '',
+      },
 
-  conditionsPaiement: "Paiement à réception",
+      updateParametres: (parametres) => set({ parametres }),
+    }),
 
-  logo: "",
-
-},
-
-        updateParametres: (parametres) =>
-          set({ parametres }),
-
-      }),
-
-      {
-        name: "easyfact-parametres",
-      }
-
-    )
-  );
+    {
+      name: 'easyfact-parametres',
+    },
+  ),
+);

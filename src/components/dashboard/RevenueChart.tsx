@@ -6,17 +6,37 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-} from "recharts";
-import { useFactureStore } from "../../store/factureStore";
+} from 'recharts';
+import { useEffect, useState } from 'react';
+import api from '../../lib/axios';
+import type { Facture } from '../../types/facture';
 
 export default function RevenueChart() {
-  const factures = useFactureStore((state) => state.factures);
+  const [facturesBackend, setFacturesBackend] = useState<Facture[]>([]);
+  useEffect(() => {
+    api
+      .get<Facture[]>('http://localhost:3000/factures')
+      .then((response) => {
+        console.log('Factures du graphique depuis NestJS:', response.data);
+        setFacturesBackend(response.data);
+      })
+      .catch((error) => {
+        console.error(
+          'Erreur lors de la récupération des factures du graphique:',
+          error,
+        );
+      });
+  }, []);
+
+ const factures = facturesBackend.filter(
+  (facture) => facture.statut === 'Payée',
+);
 
   const data = factures.reduce((acc: any[], facture) => {
     const date = new Date(facture.dateEmission);
 
-    const mois = date.toLocaleDateString("fr-FR", {
-      month: "short",
+    const mois = date.toLocaleDateString('fr-FR', {
+      month: 'short',
     });
 
     const existing = acc.find((item) => item.mois === mois);
@@ -45,7 +65,7 @@ export default function RevenueChart() {
         </div>
       </div>
 
-      <div className="h-80">
+      <div className="h-64 min-w-0 sm:h-72 lg:h-80">
         {data.length === 0 ? (
           <div className="flex h-full items-center justify-center text-slate-500">
             Aucune facture payée disponible
@@ -61,7 +81,7 @@ export default function RevenueChart() {
 
               <Tooltip
                 formatter={(value) =>
-                  `${Number(value).toLocaleString("fr-FR")} FCFA`
+                  `${Number(value).toLocaleString('fr-FR')} FCFA`
                 }
               />
 

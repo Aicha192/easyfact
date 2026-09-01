@@ -1,4 +1,4 @@
-import { Plus, FileText, Users } from "lucide-react";
+import { Plus, FileText, Users } from 'lucide-react';
 
 interface Props {
   onNewFacture: () => void;
@@ -12,14 +12,10 @@ export default function QuickActions({
   onNewProforma,
 }: Props) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-
-      <h2 className="mb-5 text-xl font-semibold">
-        Actions rapides
-      </h2>
+    <div className="rounded-2xl min-w-0 bg-white p-6 shadow-sm">
+      <h2 className="mb-5 text-xl font-semibold">Actions rapides</h2>
 
       <div className="space-y-4">
-
         <button
           onClick={onNewFacture}
           className="
@@ -56,9 +52,7 @@ export default function QuickActions({
           <FileText size={20} />
           Nouvelle proforma
         </button>
-
       </div>
-
     </div>
   );
 }

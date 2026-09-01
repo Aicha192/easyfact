@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -6,23 +6,28 @@ import {
   FileSpreadsheet,
   Settings,
   LogOut,
-} from "lucide-react";
-import { Package } from "lucide-react";
-import { useAuthStore } from "../../store/authStore";
-import { useNavigate } from "react-router-dom";
-import { UserCircle } from "lucide-react";
+} from 'lucide-react';
+import { Package } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
+import { useNavigate } from 'react-router-dom';
+import { UserCircle } from 'lucide-react';
 
 const menus = [
-  { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { name: "Factures", path: "/factures", icon: FileText },
-  { name: "Proformas", path: "/proformas", icon: FileSpreadsheet },
-  { name: "Clients", path: "/clients", icon: Users },
-  { name: "Produits", path: "/produits", icon: Package },
-  { name: "Mon Profil", path: "/profil", icon: UserCircle },
-  { name: "Paramètres", path: "/parametres", icon: Settings },
+  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { name: 'Factures', path: '/factures', icon: FileText },
+  { name: 'Proformas', path: '/proformas', icon: FileSpreadsheet },
+  { name: 'Clients', path: '/clients', icon: Users },
+  { name: 'Produits', path: '/produits', icon: Package },
+  { name: 'Mon Profil', path: '/profil', icon: UserCircle },
+  { name: 'Paramètres', path: '/parametres', icon: Settings },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const logout = useAuthStore((state) => state.logout);
 
   // const user = useAuthStore((state) => state.user);
@@ -32,11 +37,30 @@ export default function Sidebar() {
   function handleLogout() {
     logout();
 
-    navigate("/login");
+    navigate('/login');
   }
 
   return (
-    <aside className="fixed left-0 top-0 flex h-screen w-72 flex-col bg-emerald-600 text-white">
+    <aside
+      className={`
+    fixed
+    left-0
+    top-0
+    z-50
+    flex
+    h-screen
+    w-72
+    flex-col
+    bg-emerald-600
+    text-white
+    shadow-xl
+    transition-transform
+    duration-300
+    ease-in-out
+    lg:translate-x-0
+    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+  `}
+    >
       {/* Logo */}
 
       <div className="flex items-center gap-4 p-6">
@@ -66,7 +90,7 @@ export default function Sidebar() {
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 space-y-2 p-5">
+      <nav className="min-h-0 flex-1 space-y-2 overflow-y-auto p-5">
         {menus.map((menu) => {
           const Icon = menu.icon;
 
@@ -74,11 +98,12 @@ export default function Sidebar() {
             <NavLink
               key={menu.path}
               to={menu.path}
+              onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 ${
                   isActive
-                    ? "bg-white text-emerald-600 shadow-md"
-                    : "hover:bg-emerald-700"
+                    ? 'bg-white text-emerald-600 shadow-md'
+                    : 'hover:bg-emerald-700'
                 }`
               }
             >
@@ -90,7 +115,6 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-auto border-t border-emerald-500 p-5">
-       
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-emerald-700"

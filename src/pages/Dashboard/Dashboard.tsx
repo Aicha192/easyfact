@@ -1,65 +1,91 @@
-import { DollarSign, Users, FileText, TrendingUp } from "lucide-react";
-
-import StatCard from "../../components/dashboard/StatCard";
-import RevenueChart from "../../components/dashboard/RevenueChart";
-import RecentInvoices from "../../components/dashboard/RecentInvoices";
-import QuickActions from "../../components/dashboard/QuickActions";
-import { useFactureStore } from "../../store/factureStore";
-import { useClientStore } from "../../store/clientStore";
-import { useProduitStore } from "../../store/produitStore";
-import { useNavigate } from "react-router-dom";
- 
+import { useEffect, useState } from 'react';
+import api from '../../lib/axios';
+import { DollarSign, Users, FileText, TrendingUp } from 'lucide-react';
+import type { Facture } from '../../types/facture';
+import type { Client } from '../../types/client';
+import type { Produit } from '../../types/produit';
+import StatCard from '../../components/dashboard/StatCard';
+import RevenueChart from '../../components/dashboard/RevenueChart';
+import RecentInvoices from '../../components/dashboard/RecentInvoices';
+import QuickActions from '../../components/dashboard/QuickActions';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
-const factures = useFactureStore((state) => state.factures);
+const [facturesBackend, setFacturesBackend] = useState<Facture[]>([]);
+const [clientsBackend, setClientsBackend] = useState<Client[]>([]);
+const [produitsBackend, setProduitsBackend] = useState<Produit[]>([]);
 
-const navigate = useNavigate();
+useEffect(() => {
+  api.get<Facture[]>('http://localhost:3000/factures')
+    .then((response) => {
+      setFacturesBackend(response.data);
+    })
+    .catch((error) => {
+      console.error('Erreur factures:', error);
+    });
 
-const totalFactures = factures.length;
+  api.get<Client[]>('http://localhost:3000/clients')
+    .then((response) => {
+      setClientsBackend(response.data);
+    })
+    .catch((error) => {
+      console.error('Erreur clients:', error);
+    });
 
-const chiffreAffaires = factures
-  .filter((f) => f.statut === "Payée")
+  api.get<Produit[]>('http://localhost:3000/produits')
+    .then((response) => {
+      setProduitsBackend(response.data);
+    })
+    .catch((error) => {
+      console.error('Erreur produits:', error);
+    });
+}, []);
+
+  const navigate = useNavigate();
+
+  const totalFactures = facturesBackend.length;
+
+const chiffreAffaires = facturesBackend
+  .filter((f) => f.statut === 'Payée')
   .reduce((total, f) => total + f.montantTTC, 0);
 
-const clients = useClientStore((state) => state.clients);
+const totalClients = clientsBackend.length;
 
-const produits = useProduitStore((state) => state.produits);
+const totalProduits = produitsBackend.length;
 
-const totalClients = clients.length;
-
-const totalProduits = produits.length;
-
-const cards = [
-  {
-    title: "Revenus",
-    value: `${chiffreAffaires.toLocaleString()} FCFA`,
-    icon: DollarSign,
-  },
-  {
-    title: "Clients",
-    value: totalClients.toString(),
-    icon: Users,
-  },
-  {
-    title: "Factures",
-    value: totalFactures.toString(),
-    icon: FileText,
-  },
-  {
-    title: "Produits",
-    value: totalProduits.toString(),
-    icon: TrendingUp,
-  },
-];
+  const cards = [
+    {
+      title: 'Revenus',
+      value: `${chiffreAffaires.toLocaleString()} FCFA`,
+      icon: DollarSign,
+    },
+    {
+      title: 'Clients',
+      value: totalClients.toString(),
+      icon: Users,
+    },
+    {
+      title: 'Factures',
+      value: totalFactures.toString(),
+      icon: FileText,
+    },
+    {
+      title: 'Produits',
+      value: totalProduits.toString(),
+      icon: TrendingUp,
+    },
+  ];
 
   return (
     <div className="space-y-3">
       <h1 className="text-2xl font-bold">Tableau de bord</h1>
 
-      <p className="mt-2 text-3xl text-gray-500">Bienvenue sur EasyFact 👋</p>
+      <p className="mt-2 text-xl font-medium text-gray-500 sm:text-2xl lg:text-3xl">
+        Bienvenue sur EasyFact 👋
+      </p>
 
       <p className="text-sm text-gray-400">
-        Aujourd'hui : {new Date().toLocaleDateString("fr-FR")}
+        Aujourd'hui : {new Date().toLocaleDateString('fr-FR')}
       </p>
 
       {/* Cartes */}
@@ -80,21 +106,13 @@ const cards = [
           <RevenueChart />
         </div>
 
-       <QuickActions
+        <QuickActions
+          onNewFacture={() => navigate('/factures')}
 
-  onNewFacture={() =>
-    navigate("/factures")
-  }
+          onNewClient={() => navigate('/clients')}
 
-  onNewClient={() =>
-    navigate("/clients")
-  }
-
-  onNewProforma={() =>
-    navigate("/proformas")
-  }
-
-/>
+          onNewProforma={() => navigate('/proformas')}
+        />
       </div>
 
       {/* Dernières factures */}

@@ -1,32 +1,34 @@
-import { useState } from "react";
-import toast from "react-hot-toast";
-// import Modal from "../../components/ui/Modal";
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { Plus } from 'lucide-react';
+
 import ClientForm, {
   type ClientFormData,
-} from "../../components/clients/ClientForm";
-import { Plus } from "lucide-react";
-import ClientSearch from "../../components/clients/ClientSearch";
-import ClientTable from "../../components/clients/ClientTable";
-import { useClientStore } from "../../store/clientStore";
-import ConfirmDialog from "../../components/common/ConfirmDialog";
-import type { Client } from "../../types/client";
-import { useNotificationStore } from "../../store/notificationStore";
-import Sheet from "../../components/ui/Sheet";
+} from '../../components/clients/ClientForm';
+import ClientSearch from '../../components/clients/ClientSearch';
+import ClientTable from '../../components/clients/ClientTable';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import Sheet from '../../components/ui/Sheet';
+
+import { useClientStore } from '../../store/clientStore';
+import { useNotificationStore } from '../../store/notificationStore';
+
+import type { Client } from '../../types/client';
+
+import api from '../../lib/axios';
 
 export default function Clients() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const clientList = useClientStore((state) => state.clients);
+  const clients = useClientStore((state) => state.clients);
+  const setClients = useClientStore((state) => state.setClients);
+  const addClient = useClientStore((state) => state.addClient);
+  const updateClient = useClientStore((state) => state.updateClient);
+  const deleteClient = useClientStore((state) => state.deleteClient);
 
   const addNotification = useNotificationStore(
     (state) => state.addNotification,
   );
 
-  const addClient = useClientStore((state) => state.addClient);
-
-  const updateClient = useClientStore((state) => state.updateClient);
-
-  const deleteClient = useClientStore((state) => state.deleteClient);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [editingClient, setEditingClient] = useState<
     (ClientFormData & { id: number }) | null
@@ -36,112 +38,189 @@ export default function Clients() {
 
   const [clientToDelete, setClientToDelete] = useState<number | null>(null);
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
-  function handleAddClient(data: ClientFormData) {
-    const newClient: Client = {
-      id: Date.now(),
-      ...data,
-    };
+  // Récupération des clients depuis NestJS
+  useEffect(() => {
+    api
+      .get<Client[]>('/clients')
+      .then((response) => {
+        console.log(
+          'Clients récupérés depuis NestJS:',
+          response.data,
+        );
 
-    addClient(newClient);
+        setClients(response.data);
+      })
+      .catch((error) => {
+        console.error(
+          'Erreur lors de la récupération des clients:',
+          error,
+        );
 
-    addNotification({
-      title: "Nouveau client ajouté",
+        toast.error('Impossible de récupérer les clients.');
+      });
+  }, [setClients]);
 
-      message: `${newClient.nom} a été ajouté aux clients.`,
+  // Création
+  async function handleAddClient(data: ClientFormData) {
+    try {
+      const response = await api.post('/clients', data);
 
-     createdAt: Date.now(),
+      console.log(
+        'Client créé depuis NestJS:',
+        response.data,
+      );
 
-      type: "client",
-    });
+      const newClient: Client = response.data.client;
 
-    setIsOpen(false);
+      addClient(newClient);
 
-    toast.success("Client ajouté avec succès !");
+      addNotification({
+        title: 'Nouveau client ajouté',
+        message: `${newClient.nom} a été ajouté aux clients.`,
+        createdAt: Date.now(),
+        type: 'client',
+      });
+
+      setIsOpen(false);
+
+      toast.success('Client ajouté avec succès !');
+    } catch (error) {
+      console.error(
+        'Erreur lors de la création du client:',
+        error,
+      );
+
+      toast.error('Impossible de créer le client.');
+    }
   }
 
-  function handleUpdateClient(data: ClientFormData) {
+  // Modification
+  async function handleUpdateClient(data: ClientFormData) {
     if (!editingClient) return;
 
-    const updatedClient = {
-      ...editingClient,
-      ...data,
-    };
+    try {
+      const response = await api.put(
+        `/clients/${editingClient.id}`,
+        data,
+      );
 
-    updateClient(updatedClient);
+      console.log(
+        'Client modifié depuis NestJS:',
+        response.data,
+      );
 
-    addNotification({
-      title: "Client modifié",
+      const updatedClient: Client = response.data.client;
 
-      message: `${updatedClient.nom} a été modifié.`,
+      updateClient(updatedClient);
 
-      createdAt: Date.now(),
+      addNotification({
+        title: 'Client modifié',
+        message: `${updatedClient.nom} a été modifié.`,
+        createdAt: Date.now(),
+        type: 'client',
+      });
 
-      type: "client",
-    });
+      setEditingClient(null);
+      setIsOpen(false);
 
-    setEditingClient(null);
+      toast.success('Client modifié avec succès !');
+    } catch (error) {
+      console.error(
+        'Erreur lors de la modification du client:',
+        error,
+      );
 
-    setIsOpen(false);
-
-    toast.success("Client modifié avec succès !");
+      toast.error('Impossible de modifier le client.');
+    }
   }
 
-  function handleDeleteClient() {
+  // Suppression
+  async function handleDeleteClient() {
     if (clientToDelete === null) return;
 
-    const client = clientList.find((client) => client.id === clientToDelete);
+    const client = clients.find(
+      (client) => client.id === clientToDelete,
+    );
 
-    deleteClient(clientToDelete);
+    try {
+      const response = await api.delete(
+        `/clients/${clientToDelete}`,
+      );
 
-    addNotification({
-      title: "Client supprimé",
+      console.log(
+        'Client supprimé depuis NestJS:',
+        response.data,
+      );
 
-      message: `${client?.nom ?? "Le client"} a été supprimé.`,
+      deleteClient(clientToDelete);
 
-      createdAt: Date.now(),
+      addNotification({
+        title: 'Client supprimé',
+        message: `${client?.nom ?? 'Le client'} a été supprimé.`,
+        createdAt: Date.now(),
+        type: 'client',
+      });
 
-      type: "client",
-    });
+      setDeleteDialog(false);
+      setClientToDelete(null);
 
-    setDeleteDialog(false);
+      toast.success('Client supprimé avec succès !');
+    } catch (error) {
+      console.error(
+        'Erreur lors de la suppression du client:',
+        error,
+      );
 
-    setClientToDelete(null);
-
-    toast.success("Client supprimé avec succès !");
+      toast.error('Impossible de supprimer le client.');
+    }
   }
 
-  const filteredClients = clientList.filter(
+  // Recherche
+  const filteredClients = clients.filter(
     (client) =>
-      client.nom.toLowerCase().includes(search.toLowerCase()) ||
-      client.email.toLowerCase().includes(search.toLowerCase()) ||
+      client.nom
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      client.email
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
       client.telephone.includes(search),
   );
 
   return (
     <div className="space-y-6">
+      {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Clients</h1>
 
-          <p className="text-gray-500">Gérez votre portefeuille clients.</p>
+          <p className="text-gray-500">
+            Gérez votre portefeuille clients.
+          </p>
         </div>
 
         <button
           onClick={() => {
-            toast.success("EasyFact fonctionne !");
+            setEditingClient(null);
             setIsOpen(true);
           }}
           className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-white hover:bg-emerald-700"
         >
           <Plus size={20} />
+
           Nouveau client
         </button>
       </div>
 
-      <ClientSearch value={search} onChange={setSearch} />
+      {/* Recherche */}
+      <ClientSearch
+        value={search}
+        onChange={setSearch}
+      />
 
+      {/* Tableau */}
       <ClientTable
         clients={filteredClients}
         onEdit={(client) => {
@@ -153,9 +232,15 @@ export default function Clients() {
           setDeleteDialog(true);
         }}
       />
+
+      {/* Formulaire */}
       <Sheet
         isOpen={isOpen}
-        title={editingClient ? "Modifier le client" : "Nouveau client"}
+        title={
+          editingClient
+            ? 'Modifier le client'
+            : 'Nouveau client'
+        }
         size="md"
         onClose={() => {
           setEditingClient(null);
@@ -164,7 +249,11 @@ export default function Clients() {
       >
         <ClientForm
           initialData={editingClient ?? undefined}
-          onSubmit={editingClient ? handleUpdateClient : handleAddClient}
+          onSubmit={
+            editingClient
+              ? handleUpdateClient
+              : handleAddClient
+          }
           onCancel={() => {
             setEditingClient(null);
             setIsOpen(false);
@@ -172,6 +261,7 @@ export default function Clients() {
         />
       </Sheet>
 
+      {/* Confirmation suppression */}
       <ConfirmDialog
         isOpen={deleteDialog}
         title="Supprimer le client"
@@ -182,7 +272,6 @@ export default function Clients() {
         }}
         onConfirm={handleDeleteClient}
       />
-      
     </div>
   );
 }

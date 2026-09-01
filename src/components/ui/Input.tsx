@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from "react";
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,7 +8,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export default function Input({
   label,
   icon,
-  className = "",
+  className = '',
   ...props
 }: InputProps) {
   return (
@@ -26,12 +26,21 @@ export default function Input({
           </span>
         )}
 
-        <input
-          {...props}
-          className={`w-full rounded-xl border border-slate-300 ${
-            icon ? "pl-11" : "pl-4"
-          } pr-4 py-3 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-200 ${className}`}
-        />
+       <input
+  {...props}
+  className={`w-full rounded-xl border border-slate-300 ${
+    icon ? 'pl-11' : 'pl-4'
+  } pr-4 py-3
+  focus:border-emerald-600
+  focus:outline-none
+  focus:ring-2
+  focus:ring-emerald-200
+  disabled:bg-slate-100
+  disabled:text-slate-500
+  disabled:cursor-not-allowed
+  disabled:border-slate-300
+  ${className}`}
+/>
       </div>
     </div>
   );

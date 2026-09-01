@@ -1,21 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
 @media print {
-
   button {
     display: none;
   }
-
 }
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 body {
   font-family: 'Poppins', sans-serif;
 }
 
 @media print {
-
   body * {
     visibility: hidden;
   }
@@ -36,5 +33,4 @@ body {
   button {
     display: none !important;
   }
-
 }

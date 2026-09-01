@@ -1,4 +1,5 @@
-import type { StatutFacture } from "../../types/facture";
+import type { StatutFacture } from '../../types/facture';
+import type { FactureItem } from '../../types/factureItem';
 
 export interface FactureFormData {
   id?: number;
@@ -18,4 +19,6 @@ export interface FactureFormData {
   statut: StatutFacture;
 
   notes: string;
+
+  items: FactureItem[];
 }

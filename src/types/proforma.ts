@@ -1,16 +1,9 @@
-import type { FactureItem } from "./factureItem";
-
+import type { FactureItem } from './factureItem';
 
 export type StatutProforma =
-  | "Brouillon"
-  | "Envoyée"
-  | "Acceptée"
-  | "Refusée"
-  | "Expirée";
-
+  'Brouillon' | 'Envoyée' | 'Acceptée' | 'Refusée' | 'Expirée';
 
 export interface Proforma {
-
   id: number;
 
   numero: string;
@@ -33,5 +26,5 @@ export interface Proforma {
 
   notes?: string;
 
-   factureNumero?: string;
+  factureNumero?: string;
 }

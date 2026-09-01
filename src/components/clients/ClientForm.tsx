@@ -1,12 +1,12 @@
-import { useState } from "react";
-import Button from "../ui/Button";
+import { useState } from 'react';
+import Button from '../ui/Button';
 
 export interface ClientFormData {
   nom: string;
   email: string;
   telephone: string;
   adresse: string;
-  statut: "Actif" | "Inactif";
+  statut: 'Actif' | 'Inactif';
 }
 
 interface ClientFormProps {
@@ -21,17 +21,17 @@ export default function ClientForm({
   onCancel,
 }: ClientFormProps) {
   const [form, setForm] = useState<ClientFormData>(
-  initialData ?? {
-    nom: "",
-    email: "",
-    telephone: "",
-    adresse: "",
-    statut: "Actif",
-  }
-);
+    initialData ?? {
+      nom: '',
+      email: '',
+      telephone: '',
+      adresse: '',
+      statut: 'Actif',
+    },
+  );
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) {
     const { name, value } = e.target;
 
@@ -47,21 +47,18 @@ export default function ClientForm({
     onSubmit(form);
 
     setForm({
-      nom: "",
-      email: "",
-      telephone: "",
-      adresse: "",
-      statut: "Actif",
+      nom: '',
+      email: '',
+      telephone: '',
+      adresse: '',
+      statut: 'Actif',
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-
       <div>
-        <label className="mb-2 block font-medium">
-          Nom
-        </label>
+        <label className="mb-2 block font-medium">Nom</label>
 
         <input
           type="text"
@@ -74,9 +71,7 @@ export default function ClientForm({
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">
-          Email
-        </label>
+        <label className="mb-2 block font-medium">Email</label>
 
         <input
           type="email"
@@ -89,9 +84,7 @@ export default function ClientForm({
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">
-          Téléphone
-        </label>
+        <label className="mb-2 block font-medium">Téléphone</label>
 
         <input
           type="text"
@@ -104,9 +97,7 @@ export default function ClientForm({
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">
-          Adresse
-        </label>
+        <label className="mb-2 block font-medium">Adresse</label>
 
         <input
           type="text"
@@ -119,9 +110,7 @@ export default function ClientForm({
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">
-          Statut
-        </label>
+        <label className="mb-2 block font-medium">Statut</label>
 
         <select
           name="statut"
@@ -135,7 +124,6 @@ export default function ClientForm({
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-
         <button
           type="button"
           onClick={onCancel}
@@ -144,12 +132,8 @@ export default function ClientForm({
           Annuler
         </button>
 
-        <Button type="submit">
-          Enregistrer
-        </Button>
-
+        <Button type="submit">Enregistrer</Button>
       </div>
-
     </form>
   );
 }

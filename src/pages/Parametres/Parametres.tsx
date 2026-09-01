@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Building2,
   MapPin,
@@ -6,29 +6,100 @@ import {
   CreditCard,
   Image,
   Save,
-} from "lucide-react";
-import { useParametresStore } from "../../store/parametresStore";
+} from 'lucide-react';
+import { useParametresStore } from '../../store/parametresStore';
+import api from '../../lib/axios';
+import { useAuthStore } from '../../store/authStore';
 
 export default function Parametres() {
   const { parametres, updateParametres } = useParametresStore();
 
-  const [form, setForm] = useState(parametres);
+  const [form, setForm] = useState({
+  nomEntreprise: parametres.nomEntreprise ?? 'EasyFact',
+  responsable: parametres.responsable ?? '',
+  adresse: parametres.adresse ?? '',
+  telephone: parametres.telephone ?? '',
+  email: parametres.email ?? '',
+  siteWeb: parametres.siteWeb ?? '',
+  ninea: parametres.ninea ?? '',
+  rccm: parametres.rccm ?? '',
+  devise: parametres.devise ?? 'FCFA',
+  conditionsPaiement:
+    parametres.conditionsPaiement ?? 'Paiement à réception',
+  logo: parametres.logo ?? '',
+});
 
-  const [logoPreview, setLogoPreview] = useState(parametres.logo ?? "");
+  const [logoPreview, setLogoPreview] = useState(parametres.logo ?? '');
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  useEffect(() => {
+  console.log('TOKEN =', useAuthStore.getState().accessToken);
 
-    if (!form.nomEntreprise.trim()) {
-      alert("Le nom de l'entreprise est obligatoire.");
+  api
+    .get('/parametres')
+    .then((response) => {
+      console.log('PARAMETRES RECUS =', response.data);
 
-      return;
-    }
+      const data = response.data;
 
-    updateParametres(form);
+      const safeParametres = {
+        nomEntreprise: data?.nomEntreprise ?? 'EasyFact',
+        responsable: data?.responsable ?? '',
+        adresse: data?.adresse ?? '',
+        telephone: data?.telephone ?? '',
+        email: data?.email ?? '',
+        siteWeb: data?.siteWeb ?? '',
+        ninea: data?.ninea ?? '',
+        rccm: data?.rccm ?? '',
+        devise: data?.devise ?? 'FCFA',
+        conditionsPaiement:
+          data?.conditionsPaiement ?? 'Paiement à réception',
+        logo: data?.logo ?? '',
+      };
 
-    alert("Paramètres enregistrés.");
+      console.log('PARAMETRES NORMALISES =', safeParametres);
+
+      updateParametres(safeParametres);
+      setForm(safeParametres);
+      setLogoPreview(safeParametres.logo);
+    })
+    .catch((error) => {
+      console.error(
+        'Erreur lors de la récupération des paramètres:',
+        error,
+      );
+    });
+}, [updateParametres]);
+
+  async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+
+  if (!form.nomEntreprise?.trim()) {
+    alert("Le nom de l'entreprise est obligatoire.");
+    return;
   }
+
+  try {
+    const response = await api.put('/parametres', form);
+
+    console.log(
+      'Paramètres enregistrés depuis NestJS:',
+      response.data,
+    );
+
+    updateParametres(response.data.parametres);
+    setForm(response.data.parametres);
+    setLogoPreview(response.data.parametres.logo ?? '');
+
+    alert('Paramètres enregistrés.');
+  } catch (error) {
+    console.error(
+      'Erreur lors de l’enregistrement des paramètres:',
+      error,
+    );
+
+    alert('Impossible d’enregistrer les paramètres.');
+  }
+}
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -64,11 +135,13 @@ export default function Parametres() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* ENTREPRISE */}
 
-        <div className="rounded-xl border bg-white p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Building2 className="text-emerald-600" />
+        <div className="space-y-4 rounded-xl border bg-white p-4 sm:p-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <Building2 className="shrink-0 text-emerald-600" />
 
-            <h2 className="text-xl font-semibold">Informations entreprise</h2>
+            <h2 className="text-lg font-semibold sm:text-xl">
+              Informations entreprise
+            </h2>
           </div>
 
           <input
@@ -98,11 +171,11 @@ export default function Parametres() {
 
         {/* COORDONNEES */}
 
-        <div className="rounded-xl border bg-white p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <MapPin className="text-emerald-600" />
+        <div className="space-y-4 rounded-xl border bg-white p-4 sm:p-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <MapPin className="shrink-0 text-emerald-600" />
 
-            <h2 className="text-xl font-semibold">Coordonnées</h2>
+            <h2 className="text-lg font-semibold sm:text-xl">Coordonnées</h2>
           </div>
 
           <input
@@ -157,11 +230,13 @@ export default function Parametres() {
         </div>
         {/* INFORMATIONS LEGALES */}
 
-        <div className="rounded-xl border bg-white p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <FileText className="text-emerald-600" />
+        <div className="space-y-4 rounded-xl border bg-white p-4 sm:p-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <FileText className="shrink-0 text-emerald-600" />
 
-            <h2 className="text-xl font-semibold">Informations légales</h2>
+            <h2 className="text-lg font-semibold sm:text-xl">
+              Informations légales
+            </h2>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -193,11 +268,11 @@ export default function Parametres() {
 
         {/* FACTURATION */}
 
-        <div className="rounded-xl border bg-white p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <CreditCard className="text-emerald-600" />
+        <div className="space-y-4 rounded-xl border bg-white p-4 sm:p-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <CreditCard className="shrink-0 text-emerald-600" />
 
-            <h2 className="text-xl font-semibold">Facturation</h2>
+            <h2 className="text-lg font-semibold sm:text-xl">Facturation</h2>
           </div>
 
           <div>
@@ -240,11 +315,13 @@ export default function Parametres() {
 
         {/* LOGO */}
 
-        <div className="rounded-xl border bg-white p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Image className="text-emerald-600" />
+        <div className="space-y-4 rounded-xl border bg-white p-4 sm:p-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <Image className="shrink-0 text-emerald-600" />
 
-            <h2 className="text-xl font-semibold">Logo de l'entreprise</h2>
+            <h2 className="text-lg font-semibold sm:text-xl">
+              Logo de l'entreprise
+            </h2>
           </div>
 
           <input
@@ -265,11 +342,11 @@ export default function Parametres() {
               <button
                 type="button"
                 onClick={() => {
-                  setLogoPreview("");
+                  setLogoPreview('');
 
                   setForm({
                     ...form,
-                    logo: "",
+                    logo: '',
                   });
                 }}
                 className="rounded-lg bg-red-100 px-4 py-2 text-red-600 hover:bg-red-200"
@@ -283,15 +360,13 @@ export default function Parametres() {
         <button
           type="submit"
           className="
-    flex
-    items-center
-    gap-2
-    rounded-xl
+    flex w-full items-center justify-center
+    gap-2 rounded-xl
     bg-emerald-600
-    px-5
-    py-3
+    px-5 py-3
     text-white
     hover:bg-emerald-700
+    sm:w-auto
   "
         >
           <Save size={18} />

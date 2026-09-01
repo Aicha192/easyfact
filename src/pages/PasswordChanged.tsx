@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import { CircleCheckBig } from "lucide-react";
+import { Link } from 'react-router-dom';
+import { CircleCheckBig } from 'lucide-react';
 
-import AuthLayout from "../layouts/AuthLayout";
-import Button from "../components/ui/Button";
+import AuthLayout from '../layouts/AuthLayout';
+import Button from '../components/ui/Button';
 
 export default function PasswordChanged() {
   return (
@@ -28,11 +28,12 @@ export default function PasswordChanged() {
 
         <h2
           className="
-            mt-8
-            text-3xl
-            font-bold
-            text-gray-800
-          "
+    mt-8
+    text-2xl
+    font-bold
+    text-gray-800
+    sm:text-3xl
+  "
         >
           Mot de passe modifié !
         </h2>

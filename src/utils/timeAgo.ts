@@ -11,7 +11,6 @@ export function timeAgo(timestamp: number) {
 
   const days = Math.floor(hours / 24);
 
-
   if (seconds < 60) {
     return "À l'instant";
   }
@@ -21,8 +20,8 @@ export function timeAgo(timestamp: number) {
   }
 
   if (hours < 24) {
-    return `Il y a ${hours} heure${hours > 1 ? "s" : ""}`;
+    return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
   }
 
-  return `Il y a ${days} jour${days > 1 ? "s" : ""}`;
+  return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
 }

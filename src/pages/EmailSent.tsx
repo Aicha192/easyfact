@@ -1,23 +1,23 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { MailCheck } from "lucide-react";
-import toast from "react-hot-toast";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { MailCheck } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-import AuthLayout from "../layouts/AuthLayout";
-import Button from "../components/ui/Button";
+import AuthLayout from '../layouts/AuthLayout';
+import Button from '../components/ui/Button';
 
 export default function EmailSent() {
   const location = useLocation();
 
   const navigate = useNavigate();
 
-  const email = location.state?.email || "votre adresse e-mail";
+  const email = location.state?.email || 'votre adresse e-mail';
 
   function handleResend() {
     toast.success(`Le lien a été renvoyé à ${email}`);
   }
 
   function handleContinue() {
-    navigate("/reset-password");
+    navigate('/reset-password');
   }
 
   return (
@@ -43,11 +43,12 @@ export default function EmailSent() {
 
         <h2
           className="
-            mt-8
-            text-3xl
-            font-bold
-            text-gray-800
-          "
+    mt-8
+    text-2xl
+    font-bold
+    text-gray-800
+    sm:text-3xl
+  "
         >
           Vérifiez votre boîte e-mail
         </h2>
@@ -64,10 +65,11 @@ export default function EmailSent() {
 
         <p
           className="
-            mt-3
-            font-semibold
-            text-emerald-600
-          "
+  mt-3
+  break-words
+  font-semibold
+  text-emerald-600
+"
         >
           {email}
         </p>
@@ -84,7 +86,9 @@ export default function EmailSent() {
         </p>
 
         <div className="mt-8 space-y-4">
-          <Button onClick={handleResend}>Renvoyer le lien</Button>
+          <Button onClick={handleResend} className="w-full">
+            Renvoyer le lien
+          </Button>
 
           <button
             onClick={handleContinue}

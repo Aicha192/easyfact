@@ -7,29 +7,33 @@ import {
   FileText,
   Plus,
   Printer,
-} from "lucide-react";
-import Modal from "../../components/ui/Modal";
-import Sheet from "../../components/ui/Sheet";
-import ProformaForm from "../../components/proformas/ProformaForm";
-import type { Proforma } from "../../types/proforma";
-import type { Facture } from "../../types/facture";
-import { useState } from "react";
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import ConfirmDialog from "../../components/common/ConfirmDialog";
-import { useProformaStore } from "../../store/proformaStore";
-import { generateProformaPdf } from "../../utils/pdf/proformaPdf";
-import { useFactureStore } from "../../store/factureStore";
-import ProformaPreview from "../../components/proformas/ProformaPreview";
-import { useNumeroStore } from "../../store/numeroStore";
-import { generateNumber } from "../../utils/numberGenerator";
-import { useNotificationStore } from "../../store/notificationStore";
-import ProformaSearch from "../../components/proformas/ProformaSearch";
+} from 'lucide-react';
+import Modal from '../../components/ui/Modal';
+import Sheet from '../../components/ui/Sheet';
+import ProformaForm from '../../components/proformas/ProformaForm';
+import type { Proforma } from '../../types/proforma';
+import type { Facture } from '../../types/facture';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { useProformaStore } from '../../store/proformaStore';
+import { generateProformaPdf } from '../../utils/pdf/proformaPdf';
+import { useFactureStore } from '../../store/factureStore';
+import ProformaPreview from '../../components/proformas/ProformaPreview';
+import { useNumeroStore } from '../../store/numeroStore';
+import { generateNumber } from '../../utils/numberGenerator';
+import { useNotificationStore } from '../../store/notificationStore';
+import ProformaSearch from '../../components/proformas/ProformaSearch';
+import toast from 'react-hot-toast';
+import api from '../../lib/axios';
 
 export default function Proformas() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
+
+  const [proformasBackend, setProformasBackend] = useState<Proforma[]>([]);
 
   const [editingProforma, setEditingProforma] = useState<Proforma | null>(null);
 
@@ -49,6 +53,8 @@ export default function Proformas() {
     (state) => state.addNotification,
   );
 
+  const setProformas = useProformaStore((state) => state.setProformas);
+
   const addProforma = useProformaStore((state) => state.addProforma);
 
   const addFacture = useFactureStore((state) => state.addFacture);
@@ -57,17 +63,13 @@ export default function Proformas() {
 
   const deleteProforma = useProformaStore((state) => state.deleteProforma);
 
-  const proformas = useProformaStore((state) => state.proformas);
+  const proformas = proformasBackend;
 
   const filteredProformas = proformas.filter(
-  (proforma) =>
-    proforma.numero
-      .toLowerCase()
-      .includes(search.toLowerCase()) ||
-    proforma.client
-      .toLowerCase()
-      .includes(search.toLowerCase())
-);
+    (proforma) =>
+      proforma.numero.toLowerCase().includes(search.toLowerCase()) ||
+      proforma.client.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const getNextFacture = useNumeroStore((state) => state.getNextFacture);
 
@@ -92,112 +94,214 @@ export default function Proformas() {
     0,
   );
 
-  function handleAddProforma(proforma: Proforma) {
-    addProforma(proforma);
+  useEffect(() => {
+    api
+      .get<Proforma[]>('http://localhost:3000/proformas')
+      .then((response) => {
+        console.log('Proformas récupérées depuis NestJS:', response.data);
 
-    addNotification({
-      title: "Nouvelle proforma créée",
+        setProformasBackend(response.data);
+        setProformas(response.data);
+      })
+      .catch((error) => {
+        console.error('Erreur lors de la récupération des proformas:', error);
+      });
+  }, []);
 
-      message: `La proforma ${proforma.numero} a été créée.`,
+  async function handleAddProforma(proforma: Proforma) {
+    try {
+      const response = await api.post(
+        'http://localhost:3000/proformas',
+        proforma,
+      );
 
-     createdAt: Date.now(),
+      console.log('Proforma créée depuis NestJS:', response.data);
 
-      type: "proforma",
-    });
+      const newProforma: Proforma = response.data.proforma;
 
-    setIsOpen(false);
+      addProforma(newProforma);
+      setProformasBackend((current) => [...current, newProforma]);
+
+      addNotification({
+        title: 'Nouvelle proforma créée',
+        message: `La proforma ${newProforma.numero} a été créée.`,
+        createdAt: Date.now(),
+        type: 'proforma',
+      });
+
+      setIsOpen(false);
+
+      toast.success('Proforma créée avec succès !');
+    } catch (error) {
+      console.error('Erreur lors de la création de la proforma:', error);
+
+      toast.error('Impossible de créer la proforma.');
+    }
   }
 
-  function handleUpdateProforma(proforma: Proforma) {
-    updateProforma(proforma);
+  async function handleUpdateProforma(proforma: Proforma) {
+    try {
+      const response = await api.put(
+        `http://localhost:3000/proformas/${proforma.id}`,
+        proforma,
+      );
 
-    addNotification({
-      title: "Proforma modifiée",
+      console.log('Proforma modifiée depuis NestJS:', response.data);
 
-      message: `La proforma ${proforma.numero} a été modifiée.`,
+      const proformaModifiee: Proforma = response.data.proforma;
 
-      createdAt: Date.now(),
+      updateProforma(proformaModifiee);
 
-      type: "proforma",
-    });
+      setProformasBackend((current) =>
+        current.map((item) =>
+          item.id === proformaModifiee.id ? proformaModifiee : item,
+        ),
+      );
 
-    setEditingProforma(null);
+      addNotification({
+        title: 'Proforma modifiée',
+        message: `La proforma ${proformaModifiee.numero} a été modifiée.`,
+        createdAt: Date.now(),
+        type: 'proforma',
+      });
 
-    setIsOpen(false);
+      setEditingProforma(null);
+      setIsOpen(false);
+
+      toast.success('Proforma modifiée avec succès !');
+    } catch (error) {
+      console.error('Erreur lors de la modification de la proforma:', error);
+
+      toast.error('Impossible de modifier la proforma.');
+    }
   }
 
-  function handleDeleteProforma() {
+  async function handleDeleteProforma() {
     if (proformaToDelete === null) return;
+    console.log('ID proforma à supprimer =', proformaToDelete);
 
-    const deletedProforma = proformas.find((p) => p.id === proformaToDelete);
+    const deletedProforma = proformas.find(
+      (proforma) => proforma.id === proformaToDelete,
+    );
 
-    deleteProforma(proformaToDelete);
+    try {
+      const response = await api.delete(
+        `http://localhost:3000/proformas/${proformaToDelete}`,
+      );
 
-    addNotification({
-      title: "Proforma supprimée",
+      console.log('Proforma supprimée depuis NestJS:', response.data);
 
-      message: `La proforma ${deletedProforma?.numero ?? ""} a été supprimée.`,
+      deleteProforma(proformaToDelete);
 
-     createdAt: Date.now(),
+      setProformasBackend((current) =>
+        current.filter((proforma) => proforma.id !== proformaToDelete),
+      );
 
-      type: "proforma",
-    });
+      addNotification({
+        title: 'Proforma supprimée',
+        message: `${deletedProforma?.numero ?? 'La proforma'} a été supprimée.`,
+        createdAt: Date.now(),
+        type: 'proforma',
+      });
 
-    setDeleteDialog(false);
+      setDeleteDialog(false);
+      setProformaToDelete(null);
 
-    setProformaToDelete(null);
+      toast.success('Proforma supprimée avec succès !');
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la proforma:', error);
+
+      toast.error('Impossible de supprimer la proforma.');
+    }
   }
 
-  function handleConvertToFacture(proforma: Proforma) {
-    const newFacture: Facture = {
-      id: Date.now(),
-
-      numero: generateNumber("FAC", getNextFacture()),
-
+  async function handleConvertToFacture(proforma: Proforma) {
+  try {
+    
+    const factureAcreer: Facture = {
+      id: 0,
+      numero: generateNumber('FAC', getNextFacture()),
       client: proforma.client,
-
       items: proforma.items,
-
-      dateEmission: new Date().toLocaleDateString("fr-FR"),
-
+      dateEmission: new Date().toISOString(),
       dateEcheance: proforma.dateValidite,
-
       montantHT: proforma.montantHT,
-
       tva: proforma.tva,
-
       montantTTC: proforma.montantTTC,
-
-      statut: "Brouillon",
-
+      statut: 'Brouillon',
       notes: `Créée depuis la proforma ${proforma.numero}`,
     };
 
-    addFacture(newFacture);
+    const factureResponse = await api.post(
+      'http://localhost:3000/factures',
+      factureAcreer,
+    );
 
-    updateProforma({
+    console.log(
+      'Facture créée depuis la conversion:',
+      factureResponse.data,
+    );
+
+    const factureCreee: Facture = factureResponse.data.facture;
+
+    addFacture(factureCreee);
+
+    const updatedProforma = {
       ...proforma,
-      factureNumero: newFacture.numero,
-    });
+      factureNumero: factureCreee.numero,
+    };
+
+    const proformaResponse = await api.put(
+      `http://localhost:3000/proformas/${proforma.id}`,
+      updatedProforma,
+    );
+
+    console.log(
+      'Proforma mise à jour après conversion:',
+      proformaResponse.data,
+    );
+
+    const proformaModifiee: Proforma =
+      proformaResponse.data.proforma;
+
+    updateProforma(proformaModifiee);
+
+    setProformasBackend((current) =>
+      current.map((item) =>
+        item.id === proformaModifiee.id
+          ? proformaModifiee
+          : item,
+      ),
+    );
 
     addNotification({
-      title: "Proforma convertie",
-
-      message: `${proforma.numero} a été convertie en facture ${newFacture.numero}.`,
-
-     createdAt: Date.now(),
-
-      type: "facture",
+      title: 'Proforma convertie',
+      message: `La proforma ${proforma.numero} a été convertie en facture ${factureCreee.numero}.`,
+      createdAt: Date.now(),
+      type: 'proforma',
     });
+
     setProformaToConvert(null);
+
+    toast.success(
+      'Proforma convertie en facture avec succès !',
+    );
+  } catch (error) {
+    console.error(
+      'Erreur lors de la conversion de la proforma:',
+      error,
+    );
+
+    toast.error(
+      'Impossible de convertir la proforma en facture.',
+    );
   }
+}
 
   function confirmConvertToFacture() {
     if (!proformaToConvert) return;
 
     handleConvertToFacture(proformaToConvert);
-
-    setProformaToConvert(null);
   }
 
   return (
@@ -249,12 +353,12 @@ export default function Proformas() {
         </div>
       </div>
 
-      <ProformaSearch value={search} onChange={setSearch}/>
+      <ProformaSearch value={search} onChange={setSearch} />
 
       {/* Tableau */}
 
-       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-       <table className="w-full">
+      <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <table className="w-full min-w-[900px]">
           <thead className="bg-slate-100">
             <tr>
               <th className="p-4 text-left">Numéro</th>
@@ -272,31 +376,49 @@ export default function Proformas() {
           <tbody>
             {filteredProformas.map((proforma) => (
               <tr key={proforma.id} className="border-t hover:bg-slate-50">
-                <td className="p-4 font-semibold">{proforma.numero}</td>
-
-                <td>{proforma.client}</td>
-
-                <td>{proforma.montantTTC.toLocaleString()} FCFA</td>
-
-                <td>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      proforma.statut === "Acceptée"
-                        ? "bg-green-100 text-green-700"
-                        : proforma.statut === "Envoyée"
-                          ? "bg-blue-100 text-blue-700"
-                          : proforma.statut === "Refusée"
-                            ? "bg-red-100 text-red-700"
-                            : proforma.statut === "Expirée"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {proforma.statut}
-                  </span>
+                <td className="whitespace-nowrap p-4 font-semibold">
+                  {proforma.numero}
                 </td>
 
-                <td>
+                <td className="whitespace-nowrap">{proforma.client}</td>
+
+                <td className="whitespace-nowrap">
+                  {proforma.montantTTC.toLocaleString()} FCFA
+                </td>
+
+                <td className="whitespace-nowrap">
+                  <select
+                    value={proforma.statut}
+                    onChange={(e) => {
+                      const nouveauStatut = e.target
+                        .value as Proforma['statut'];
+
+                      handleUpdateProforma({
+                        ...proforma,
+                        statut: nouveauStatut,
+                      });
+                    }}
+                    className={`rounded-full px-3 py-1 text-xs font-medium outline-none cursor-pointer ${
+                      proforma.statut === 'Acceptée'
+                        ? 'bg-green-100 text-green-700'
+                        : proforma.statut === 'Envoyée'
+                          ? 'bg-blue-100 text-blue-700'
+                          : proforma.statut === 'Refusée'
+                            ? 'bg-red-100 text-red-700'
+                            : proforma.statut === 'Expirée'
+                              ? 'bg-orange-100 text-orange-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                    }`}
+                  >
+                    <option value="Brouillon">Brouillon</option>
+                    <option value="Envoyée">Envoyée</option>
+                    <option value="Acceptée">Acceptée</option>
+                    <option value="Refusée">Refusée</option>
+                    <option value="Expirée">Expirée</option>
+                  </select>
+                </td>
+
+                <td className="whitespace-nowrap">
                   <div className="flex items-center justify-center gap-2">
                     <button
                       onClick={() => {
@@ -340,7 +462,7 @@ export default function Proformas() {
                     </button>
 
                     <button
-                      onClick={() => generateProformaPdf(proforma, "print")}
+                      onClick={() => generateProformaPdf(proforma, 'print')}
                       className="rounded-lg bg-indigo-100 p-2 text-indigo-600 hover:bg-indigo-200"
                       title="Imprimer"
                     >
@@ -420,8 +542,8 @@ export default function Proformas() {
         >
           <div className="space-y-5">
             <p className="text-gray-600">
-              Vous êtes sur le point de convertir la proforma{" "}
-              <span className="font-semibold">{proformaToConvert.numero}</span>{" "}
+              Vous êtes sur le point de convertir la proforma{' '}
+              <span className="font-semibold">{proformaToConvert.numero}</span>{' '}
               en facture.
             </p>
 
@@ -429,16 +551,18 @@ export default function Proformas() {
               Une nouvelle facture sera créée à partir de cette proforma.
             </p>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 onClick={() => setProformaToConvert(null)}
                 className="
-            rounded-lg
-            border
-            px-4
-            py-2
-            hover:bg-gray-100
-          "
+    w-full
+    rounded-lg
+    border
+    px-4
+    py-2
+    hover:bg-gray-100
+    sm:w-auto
+  "
               >
                 Annuler
               </button>
@@ -446,13 +570,15 @@ export default function Proformas() {
               <button
                 onClick={confirmConvertToFacture}
                 className="
-            rounded-lg
-            bg-violet-600
-            px-4
-            py-2
-            text-white
-            hover:bg-violet-700
-          "
+    w-full
+    rounded-lg
+    bg-violet-600
+    px-4
+    py-2
+    text-white
+    hover:bg-violet-700
+    sm:w-auto
+  "
               >
                 Convertir
               </button>

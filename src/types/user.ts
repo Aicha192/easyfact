@@ -9,7 +9,7 @@ export interface User {
 
   password: string;
 
-  role: "Admin" | "Utilisateur";
-  
+  role: 'Admin' | 'Utilisateur';
+
   avatar?: string;
 }
