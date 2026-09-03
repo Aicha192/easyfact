@@ -6,7 +6,7 @@ export default function RecentInvoices() {
   const [facturesBackend, setFacturesBackend] = useState<Facture[]>([]);
   useEffect(() => {
     api
-      .get<Facture[]>('http://localhost:3000/factures')
+      .get<Facture[]>('/factures')
       .then((response) => {
         console.log(
           'Dernières factures récupérées depuis NestJS:',

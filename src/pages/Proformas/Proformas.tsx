@@ -96,7 +96,7 @@ export default function Proformas() {
 
   useEffect(() => {
     api
-      .get<Proforma[]>('http://localhost:3000/proformas')
+      .get<Proforma[]>('/proformas')
       .then((response) => {
         console.log('Proformas récupérées depuis NestJS:', response.data);
 
@@ -110,10 +110,7 @@ export default function Proformas() {
 
   async function handleAddProforma(proforma: Proforma) {
     try {
-      const response = await api.post(
-        'http://localhost:3000/proformas',
-        proforma,
-      );
+      const response = await api.post('/proformas', proforma);
 
       console.log('Proforma créée depuis NestJS:', response.data);
 
@@ -141,10 +138,7 @@ export default function Proformas() {
 
   async function handleUpdateProforma(proforma: Proforma) {
     try {
-      const response = await api.put(
-        `http://localhost:3000/proformas/${proforma.id}`,
-        proforma,
-      );
+      const response = await api.put(`/proformas/${proforma.id}`, proforma);
 
       console.log('Proforma modifiée depuis NestJS:', response.data);
 
@@ -186,7 +180,7 @@ export default function Proformas() {
 
     try {
       const response = await api.delete(
-        `http://localhost:3000/proformas/${proformaToDelete}`,
+        `/proformas/${proformaToDelete}`,
       );
 
       console.log('Proforma supprimée depuis NestJS:', response.data);
@@ -232,8 +226,7 @@ export default function Proformas() {
       notes: `Créée depuis la proforma ${proforma.numero}`,
     };
 
-    const factureResponse = await api.post(
-      'http://localhost:3000/factures',
+    const factureResponse = await api.post('/factures',
       factureAcreer,
     );
 
@@ -251,8 +244,7 @@ export default function Proformas() {
       factureNumero: factureCreee.numero,
     };
 
-    const proformaResponse = await api.put(
-      `http://localhost:3000/proformas/${proforma.id}`,
+    const proformaResponse = await api.put(`/proformas/${proforma.id}`,
       updatedProforma,
     );
 

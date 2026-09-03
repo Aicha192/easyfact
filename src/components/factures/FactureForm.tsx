@@ -50,8 +50,8 @@ const [produits, setProduits] = useState<Produit[]>([]);
 
 useEffect(() => {
   Promise.all([
-    api.get<Client[]>('http://localhost:3000/clients'),
-    api.get<Produit[]>('http://localhost:3000/produits'),
+    api.get<Client[]>('/clients'),
+    api.get<Produit[]>('/produits'),
   ])
     .then(([clientsResponse, produitsResponse]) => {
       setClients(clientsResponse.data);

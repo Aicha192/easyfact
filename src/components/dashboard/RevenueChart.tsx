@@ -15,7 +15,7 @@ export default function RevenueChart() {
   const [facturesBackend, setFacturesBackend] = useState<Facture[]>([]);
   useEffect(() => {
     api
-      .get<Facture[]>('http://localhost:3000/factures')
+     .get<Facture[]>('/factures')
       .then((response) => {
         console.log('Factures du graphique depuis NestJS:', response.data);
         setFacturesBackend(response.data);

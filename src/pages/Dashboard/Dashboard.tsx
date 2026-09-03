@@ -16,7 +16,7 @@ const [clientsBackend, setClientsBackend] = useState<Client[]>([]);
 const [produitsBackend, setProduitsBackend] = useState<Produit[]>([]);
 
 useEffect(() => {
-  api.get<Facture[]>('http://localhost:3000/factures')
+ api.get<Facture[]>('/factures')
     .then((response) => {
       setFacturesBackend(response.data);
     })
@@ -24,7 +24,7 @@ useEffect(() => {
       console.error('Erreur factures:', error);
     });
 
-  api.get<Client[]>('http://localhost:3000/clients')
+ api.get<Client[]>('/clients')
     .then((response) => {
       setClientsBackend(response.data);
     })
@@ -32,7 +32,7 @@ useEffect(() => {
       console.error('Erreur clients:', error);
     });
 
-  api.get<Produit[]>('http://localhost:3000/produits')
+ api.get<Produit[]>('/produits')
     .then((response) => {
       setProduitsBackend(response.data);
     })
