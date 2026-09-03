@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../lib/axios';
 import AuthLayout from '../../layouts/AuthLayout';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
@@ -22,7 +22,7 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
+      const response = await api.post('/auth/login', {
         email,
         password,
       });
@@ -32,7 +32,7 @@ export default function Login() {
       const user = response.data.user;
 
       toast.success(`Bienvenue ${user.nom} !`);
-     login(user, response.data.access_token);
+      login(user, response.data.access_token);
 
       addNotification({
         title: 'Connexion réussie',
