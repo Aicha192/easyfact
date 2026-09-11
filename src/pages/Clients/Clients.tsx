@@ -101,10 +101,16 @@ export default function Clients() {
     if (!editingClient) return;
 
     try {
-      const response = await api.put(
-        `/clients/${editingClient.id}`,
-        data,
-      );
+     const response = await api.put(
+  `/clients/${editingClient.id}`,
+  {
+    nom: data.nom,
+    email: data.email,
+    telephone: data.telephone,
+    adresse: data.adresse,
+    statut: data.statut,
+  },
+);
 
       console.log(
         'Client modifié depuis NestJS:',
