@@ -22,9 +22,9 @@ export default function ProformaForm({
 
     client: initialData?.client ?? '',
 
-    dateEmission:
+  dateEmission:
   initialData?.dateEmission ??
-  new Date().toISOString().split('T')[0],
+  new Date().toLocaleDateString('en-CA'),
 
    dateValidite:
   initialData?.dateValidite ??

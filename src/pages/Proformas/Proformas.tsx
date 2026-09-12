@@ -110,26 +110,23 @@ export default function Proformas() {
 
   async function handleAddProforma(proforma: Proforma) {
     try {
-     const response = await api.post(
-  '/proformas',
-  {
-    numero: proforma.numero,
-    client: proforma.client,
-    items: proforma.items.map((item) => ({
-      designation: item.designation,
-      quantite: item.quantite,
-      prixUnitaire: item.prixUnitaire,
-      total: item.total,
-    })),
-    dateEmission: proforma.dateEmission,
-    dateValidite: proforma.dateValidite,
-    montantHT: proforma.montantHT,
-    tva: proforma.tva,
-    montantTTC: proforma.montantTTC,
-    statut: proforma.statut,
-    notes: proforma.notes,
-  },
-);
+      const response = await api.post('/proformas', {
+        numero: proforma.numero,
+        client: proforma.client,
+        items: proforma.items.map((item) => ({
+          designation: item.designation,
+          quantite: item.quantite,
+          prixUnitaire: item.prixUnitaire,
+          total: item.total,
+        })),
+        dateEmission: proforma.dateEmission,
+        dateValidite: proforma.dateValidite,
+        montantHT: proforma.montantHT,
+        tva: proforma.tva,
+        montantTTC: proforma.montantTTC,
+        statut: proforma.statut,
+        notes: proforma.notes,
+      });
 
       console.log('Proforma créée depuis NestJS:', response.data);
 
@@ -198,9 +195,7 @@ export default function Proformas() {
     );
 
     try {
-      const response = await api.delete(
-        `/proformas/${proformaToDelete}`,
-      );
+      const response = await api.delete(`/proformas/${proformaToDelete}`);
 
       console.log('Proforma supprimée depuis NestJS:', response.data);
 
@@ -229,85 +224,70 @@ export default function Proformas() {
   }
 
   async function handleConvertToFacture(proforma: Proforma) {
-  try {
-    
-    const factureAcreer: Facture = {
-      id: 0,
-      numero: generateNumber('FAC', getNextFacture()),
-      client: proforma.client,
-      items: proforma.items,
-      dateEmission: new Date().toISOString(),
-      dateEcheance: proforma.dateValidite,
-      montantHT: proforma.montantHT,
-      tva: proforma.tva,
-      montantTTC: proforma.montantTTC,
-      statut: 'Brouillon',
-      notes: `Créée depuis la proforma ${proforma.numero}`,
-    };
+    try {
+      const factureAcreer: Facture = {
+        id: 0,
+        numero: generateNumber('FAC', getNextFacture()),
+        client: proforma.client,
+        items: proforma.items,
+        dateEmission: new Date().toISOString(),
+        dateEcheance: proforma.dateValidite,
+        montantHT: proforma.montantHT,
+        tva: proforma.tva,
+        montantTTC: proforma.montantTTC,
+        statut: 'Brouillon',
+        notes: `Créée depuis la proforma ${proforma.numero}`,
+      };
 
-    const factureResponse = await api.post('/factures',
-      factureAcreer,
-    );
+      const factureResponse = await api.post('/factures', factureAcreer);
 
-    console.log(
-      'Facture créée depuis la conversion:',
-      factureResponse.data,
-    );
+      console.log('Facture créée depuis la conversion:', factureResponse.data);
 
-    const factureCreee: Facture = factureResponse.data.facture;
+      const factureCreee: Facture = factureResponse.data.facture;
 
-    addFacture(factureCreee);
+      addFacture(factureCreee);
 
-    const updatedProforma = {
-      ...proforma,
-      factureNumero: factureCreee.numero,
-    };
+      const updatedProforma = {
+        ...proforma,
+        factureNumero: factureCreee.numero,
+      };
 
-    const proformaResponse = await api.put(`/proformas/${proforma.id}`,
-      updatedProforma,
-    );
+      const proformaResponse = await api.put(
+        `/proformas/${proforma.id}`,
+        updatedProforma,
+      );
 
-    console.log(
-      'Proforma mise à jour après conversion:',
-      proformaResponse.data,
-    );
+      console.log(
+        'Proforma mise à jour après conversion:',
+        proformaResponse.data,
+      );
 
-    const proformaModifiee: Proforma =
-      proformaResponse.data.proforma;
+      const proformaModifiee: Proforma = proformaResponse.data.proforma;
 
-    updateProforma(proformaModifiee);
+      updateProforma(proformaModifiee);
 
-    setProformasBackend((current) =>
-      current.map((item) =>
-        item.id === proformaModifiee.id
-          ? proformaModifiee
-          : item,
-      ),
-    );
+      setProformasBackend((current) =>
+        current.map((item) =>
+          item.id === proformaModifiee.id ? proformaModifiee : item,
+        ),
+      );
 
-    addNotification({
-      title: 'Proforma convertie',
-      message: `La proforma ${proforma.numero} a été convertie en facture ${factureCreee.numero}.`,
-      createdAt: Date.now(),
-      type: 'proforma',
-    });
+      addNotification({
+        title: 'Proforma convertie',
+        message: `La proforma ${proforma.numero} a été convertie en facture ${factureCreee.numero}.`,
+        createdAt: Date.now(),
+        type: 'proforma',
+      });
 
-    setProformaToConvert(null);
+      setProformaToConvert(null);
 
-    toast.success(
-      'Proforma convertie en facture avec succès !',
-    );
-  } catch (error) {
-    console.error(
-      'Erreur lors de la conversion de la proforma:',
-      error,
-    );
+      toast.success('Proforma convertie en facture avec succès !');
+    } catch (error) {
+      console.error('Erreur lors de la conversion de la proforma:', error);
 
-    toast.error(
-      'Impossible de convertir la proforma en facture.',
-    );
+      toast.error('Impossible de convertir la proforma en facture.');
+    }
   }
-}
 
   function confirmConvertToFacture() {
     if (!proformaToConvert) return;
@@ -376,6 +356,8 @@ export default function Proformas() {
 
               <th>Client</th>
 
+              <th>Date d'émission</th>
+
               <th>Montant TTC</th>
 
               <th>Statut</th>
@@ -392,6 +374,8 @@ export default function Proformas() {
                 </td>
 
                 <td className="whitespace-nowrap">{proforma.client}</td>
+
+                <td className="whitespace-nowrap">{proforma.dateEmission}</td>
 
                 <td className="whitespace-nowrap">
                   {proforma.montantTTC.toLocaleString()} FCFA
