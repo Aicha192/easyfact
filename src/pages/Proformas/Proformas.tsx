@@ -154,7 +154,27 @@ export default function Proformas() {
 
   async function handleUpdateProforma(proforma: Proforma) {
     try {
-      const response = await api.put(`/proformas/${proforma.id}`, proforma);
+      const response = await api.put(
+  `/proformas/${proforma.id}`,
+  {
+    numero: proforma.numero,
+    client: proforma.client,
+    items: proforma.items.map((item) => ({
+      id: item.id,
+      designation: item.designation,
+      quantite: item.quantite,
+      prixUnitaire: item.prixUnitaire,
+      total: item.total,
+    })),
+    dateEmission: proforma.dateEmission,
+    dateValidite: proforma.dateValidite,
+    montantHT: proforma.montantHT,
+    tva: proforma.tva,
+    montantTTC: proforma.montantTTC,
+    statut: proforma.statut,
+    notes: proforma.notes,
+  },
+);
 
       console.log('Proforma modifiée depuis NestJS:', response.data);
 
