@@ -165,11 +165,27 @@ export function useFactures() {
     updatedFacture: Facture,
   ) {
     try {
-      const response = await api.put(
-        `/factures/${updatedFacture.id}`,
-        updatedFacture,
-      );
-
+     const response = await api.put(
+  `/factures/${updatedFacture.id}`,
+  {
+    numero: updatedFacture.numero,
+    client: updatedFacture.client,
+    items: updatedFacture.items.map((item) => ({
+      id: item.id,
+      designation: item.designation,
+      quantite: item.quantite,
+      prixUnitaire: item.prixUnitaire,
+      total: item.total,
+    })),
+    dateEmission: updatedFacture.dateEmission,
+    dateEcheance: updatedFacture.dateEcheance,
+    montantHT: updatedFacture.montantHT,
+    tva: updatedFacture.tva,
+    montantTTC: updatedFacture.montantTTC,
+    statut: updatedFacture.statut,
+    notes: updatedFacture.notes,
+  },
+);
       console.log(
         'Facture modifiée depuis NestJS:',
         response.data,
