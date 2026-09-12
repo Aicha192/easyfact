@@ -104,10 +104,26 @@ export function useFactures() {
 
   async function handleAddFacture(facture: Facture) {
     try {
-      const response = await api.post(
-        '/factures',
-        facture,
-      );
+     const response = await api.post(
+  '/factures',
+  {
+    numero: facture.numero,
+    client: facture.client,
+    items: facture.items.map((item) => ({
+      designation: item.designation,
+      quantite: item.quantite,
+      prixUnitaire: item.prixUnitaire,
+      total: item.total,
+    })),
+    dateEmission: facture.dateEmission,
+    dateEcheance: facture.dateEcheance,
+    montantHT: facture.montantHT,
+    tva: facture.tva,
+    montantTTC: facture.montantTTC,
+    statut: facture.statut,
+    notes: facture.notes,
+  },
+);
 
       console.log(
         'Facture créée depuis NestJS:',
