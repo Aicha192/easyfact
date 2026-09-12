@@ -356,7 +356,10 @@ export default function Proformas() {
 
               <th>Client</th>
 
-              <th>Date d'émission</th>
+              <th className="w-32 text-center leading-tight">
+                <span className="block">Date</span>
+                <span className="block">d'émission</span>
+              </th>
 
               <th>Montant TTC</th>
 
@@ -375,7 +378,9 @@ export default function Proformas() {
 
                 <td className="whitespace-nowrap">{proforma.client}</td>
 
-                <td className="whitespace-nowrap">{proforma.dateEmission}</td>
+                <td className="whitespace-nowrap">
+                  {new Date(proforma.dateEmission).toLocaleDateString('fr-FR')}
+                </td>
 
                 <td className="whitespace-nowrap">
                   {proforma.montantTTC.toLocaleString()} FCFA
