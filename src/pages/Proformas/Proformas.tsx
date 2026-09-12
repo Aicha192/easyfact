@@ -110,7 +110,26 @@ export default function Proformas() {
 
   async function handleAddProforma(proforma: Proforma) {
     try {
-      const response = await api.post('/proformas', proforma);
+     const response = await api.post(
+  '/proformas',
+  {
+    numero: proforma.numero,
+    client: proforma.client,
+    items: proforma.items.map((item) => ({
+      designation: item.designation,
+      quantite: item.quantite,
+      prixUnitaire: item.prixUnitaire,
+      total: item.total,
+    })),
+    dateEmission: proforma.dateEmission,
+    dateValidite: proforma.dateValidite,
+    montantHT: proforma.montantHT,
+    tva: proforma.tva,
+    montantTTC: proforma.montantTTC,
+    statut: proforma.statut,
+    notes: proforma.notes,
+  },
+);
 
       console.log('Proforma créée depuis NestJS:', response.data);
 
