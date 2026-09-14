@@ -259,7 +259,26 @@ export default function Proformas() {
         notes: `Créée depuis la proforma ${proforma.numero}`,
       };
 
-      const factureResponse = await api.post('/factures', factureAcreer);
+      const factureResponse = await api.post(
+  '/factures',
+  {
+    numero: factureAcreer.numero,
+    client: factureAcreer.client,
+    items: factureAcreer.items.map((item) => ({
+      designation: item.designation,
+      quantite: item.quantite,
+      prixUnitaire: item.prixUnitaire,
+      total: item.total,
+    })),
+    dateEmission: factureAcreer.dateEmission,
+    dateEcheance: factureAcreer.dateEcheance,
+    montantHT: factureAcreer.montantHT,
+    tva: factureAcreer.tva,
+    montantTTC: factureAcreer.montantTTC,
+    statut: factureAcreer.statut,
+    notes: factureAcreer.notes,
+  },
+);
 
       console.log('Facture créée depuis la conversion:', factureResponse.data);
 
@@ -267,15 +286,28 @@ export default function Proformas() {
 
       addFacture(factureCreee);
 
-      const updatedProforma = {
-        ...proforma,
-        factureNumero: factureCreee.numero,
-      };
-
-      const proformaResponse = await api.put(
-        `/proformas/${proforma.id}`,
-        updatedProforma,
-      );
+     const proformaResponse = await api.put(
+  `/proformas/${proforma.id}`,
+  {
+    numero: proforma.numero,
+    client: proforma.client,
+    items: proforma.items.map((item) => ({
+      id: item.id,
+      designation: item.designation,
+      quantite: item.quantite,
+      prixUnitaire: item.prixUnitaire,
+      total: item.total,
+    })),
+    dateEmission: proforma.dateEmission,
+    dateValidite: proforma.dateValidite,
+    montantHT: proforma.montantHT,
+    tva: proforma.tva,
+    montantTTC: proforma.montantTTC,
+    statut: proforma.statut,
+    notes: proforma.notes,
+    factureNumero: factureCreee.numero,
+  },
+);
 
       console.log(
         'Proforma mise à jour après conversion:',
