@@ -8,10 +8,6 @@ export default function RecentInvoices() {
     api
       .get<Facture[]>('/factures')
       .then((response) => {
-        console.log(
-          'Dernières factures récupérées depuis NestJS:',
-          response.data,
-        );
         setFacturesBackend(response.data);
       })
       .catch((error) => {

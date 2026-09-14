@@ -35,7 +35,6 @@ export default function Parametres() {
   api
     .get('/parametres')
     .then((response) => {
-      console.log('PARAMETRES RECUS =', response.data);
 
       const data = response.data;
 
@@ -53,8 +52,6 @@ export default function Parametres() {
           data?.conditionsPaiement ?? 'Paiement à réception',
         logo: data?.logo ?? '',
       };
-
-      console.log('PARAMETRES NORMALISES =', safeParametres);
 
       updateParametres(safeParametres);
       setForm(safeParametres);
@@ -78,11 +75,6 @@ export default function Parametres() {
 
   try {
     const response = await api.put('/parametres', form);
-
-    console.log(
-      'Paramètres enregistrés depuis NestJS:',
-      response.data,
-    );
 
     updateParametres(response.data.parametres);
     setForm(response.data.parametres);

@@ -36,14 +36,12 @@ async function handleRegister(e: React.FormEvent) {
   }
 
   try {
-    const response = await api.post('/auth/register', {
+    await api.post('/auth/register', {
       nom,
       email,
       telephone,
       password,
     });
-
-    console.log('Inscription réussie depuis NestJS:', response.data);
 
     toast.success('Compte créé avec succès !');
 

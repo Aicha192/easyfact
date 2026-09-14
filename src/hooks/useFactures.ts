@@ -43,11 +43,6 @@ export function useFactures() {
     api
       .get<Facture[]>('/factures')
       .then((response) => {
-        console.log(
-          'Factures récupérées depuis NestJS:',
-          response.data,
-        );
-
         setFactures(response.data);
       })
       .catch((error) => {
@@ -125,11 +120,6 @@ export function useFactures() {
   },
 );
 
-      console.log(
-        'Facture créée depuis NestJS:',
-        response.data,
-      );
-
       const newFacture: Facture =
         response.data.facture;
 
@@ -186,10 +176,6 @@ export function useFactures() {
     notes: updatedFacture.notes,
   },
 );
-      console.log(
-        'Facture modifiée depuis NestJS:',
-        response.data,
-      );
 
       const factureModifiee: Facture =
         response.data.facture;
@@ -231,13 +217,8 @@ export function useFactures() {
     );
 
     try {
-      const response = await api.delete(
-        `/factures/${factureToDelete}`,
-      );
-
-      console.log(
-        'Facture supprimée depuis NestJS:',
-        response.data,
+      await api.delete(
+     `/factures/${factureToDelete}`,
       );
 
       deleteFacture(factureToDelete);
@@ -292,12 +273,6 @@ export function useFactures() {
         `/factures/${id}`,
         factureModifiee,
       );
-
-      console.log(
-        'Statut modifié depuis NestJS:',
-        response.data,
-      );
-
       const factureMiseAJour: Facture =
         response.data.facture;
 

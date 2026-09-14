@@ -17,7 +17,6 @@ export default function RevenueChart() {
     api
      .get<Facture[]>('/factures')
       .then((response) => {
-        console.log('Factures du graphique depuis NestJS:', response.data);
         setFacturesBackend(response.data);
       })
       .catch((error) => {

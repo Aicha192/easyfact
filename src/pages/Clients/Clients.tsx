@@ -45,11 +45,6 @@ export default function Clients() {
     api
       .get<Client[]>('/clients')
       .then((response) => {
-        console.log(
-          'Clients récupérés depuis NestJS:',
-          response.data,
-        );
-
         setClients(response.data);
       })
       .catch((error) => {
@@ -66,11 +61,6 @@ export default function Clients() {
   async function handleAddClient(data: ClientFormData) {
     try {
       const response = await api.post('/clients', data);
-
-      console.log(
-        'Client créé depuis NestJS:',
-        response.data,
-      );
 
       const newClient: Client = response.data.client;
 
@@ -111,12 +101,6 @@ export default function Clients() {
     statut: data.statut,
   },
 );
-
-      console.log(
-        'Client modifié depuis NestJS:',
-        response.data,
-      );
-
       const updatedClient: Client = response.data.client;
 
       updateClient(updatedClient);
@@ -151,13 +135,8 @@ export default function Clients() {
     );
 
     try {
-      const response = await api.delete(
+      await api.delete(
         `/clients/${clientToDelete}`,
-      );
-
-      console.log(
-        'Client supprimé depuis NestJS:',
-        response.data,
       );
 
       deleteClient(clientToDelete);

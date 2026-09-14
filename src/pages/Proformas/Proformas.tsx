@@ -98,8 +98,6 @@ export default function Proformas() {
     api
       .get<Proforma[]>('/proformas')
       .then((response) => {
-        console.log('Proformas récupérées depuis NestJS:', response.data);
-
         setProformasBackend(response.data);
         setProformas(response.data);
       })
@@ -127,8 +125,6 @@ export default function Proformas() {
         statut: proforma.statut,
         notes: proforma.notes,
       });
-
-      console.log('Proforma créée depuis NestJS:', response.data);
 
       const newProforma: Proforma = response.data.proforma;
 
@@ -176,8 +172,6 @@ export default function Proformas() {
   },
 );
 
-      console.log('Proforma modifiée depuis NestJS:', response.data);
-
       const proformaModifiee: Proforma = response.data.proforma;
 
       updateProforma(proformaModifiee);
@@ -208,16 +202,13 @@ export default function Proformas() {
 
   async function handleDeleteProforma() {
     if (proformaToDelete === null) return;
-    console.log('ID proforma à supprimer =', proformaToDelete);
 
     const deletedProforma = proformas.find(
       (proforma) => proforma.id === proformaToDelete,
     );
 
     try {
-      const response = await api.delete(`/proformas/${proformaToDelete}`);
-
-      console.log('Proforma supprimée depuis NestJS:', response.data);
+      await api.delete(`/proformas/${proformaToDelete}`);
 
       deleteProforma(proformaToDelete);
 
@@ -280,8 +271,6 @@ export default function Proformas() {
   },
 );
 
-      console.log('Facture créée depuis la conversion:', factureResponse.data);
-
       const factureCreee: Facture = factureResponse.data.facture;
 
       addFacture(factureCreee);
@@ -307,13 +296,7 @@ export default function Proformas() {
     notes: proforma.notes,
     factureNumero: factureCreee.numero,
   },
-);
-
-      console.log(
-        'Proforma mise à jour après conversion:',
-        proformaResponse.data,
-      );
-
+     );
       const proformaModifiee: Proforma = proformaResponse.data.proforma;
 
       updateProforma(proformaModifiee);

@@ -25,7 +25,6 @@ useEffect(() => {
   api
     .get<Produit[]>('/produits')
     .then((response) => {
-      console.log('Produits récupérés depuis NestJS:', response.data);
       setProduits(response.data);
     })
     .catch((error) => {
@@ -61,8 +60,6 @@ useEffect(() => {
  async function handleAddProduit(data: ProduitFormData) {
   try {
     const response = await api.post('/produits', data);
-
-    console.log('Produit créé depuis NestJS:', response.data);
 
     const newProduit: Produit = response.data.produit;
 
@@ -102,8 +99,6 @@ useEffect(() => {
   updatedProduit,
 );
 
-    console.log('Produit modifié depuis NestJS:', response.data);
-
     const produitModifie: Produit = response.data.produit;
 
     updateProduit(produitModifie);
@@ -136,9 +131,7 @@ useEffect(() => {
   );
 
   try {
-    const response = await api.delete(`/produits/${produitToDelete}`);
-
-    console.log('Produit supprimé depuis NestJS:', response.data);
+    await api.delete(`/produits/${produitToDelete}`);
 
     deleteProduit(produitToDelete);
 
