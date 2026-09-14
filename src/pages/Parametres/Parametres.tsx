@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { useParametresStore } from '../../store/parametresStore';
 import api from '../../lib/axios';
-import { useAuthStore } from '../../store/authStore';
 
 export default function Parametres() {
   const { parametres, updateParametres } = useParametresStore();
@@ -32,7 +31,6 @@ export default function Parametres() {
   const [logoPreview, setLogoPreview] = useState(parametres.logo ?? '');
 
   useEffect(() => {
-  console.log('TOKEN =', useAuthStore.getState().accessToken);
 
   api
     .get('/parametres')

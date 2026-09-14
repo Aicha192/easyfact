@@ -27,8 +27,6 @@ export default function Login() {
         password,
       });
 
-      console.log('JWT reçu depuis NestJS:', response.data.access_token);
-
       const user = response.data.user;
 
       toast.success(`Bienvenue ${user.nom} !`);
