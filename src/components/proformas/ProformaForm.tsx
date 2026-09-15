@@ -26,9 +26,9 @@ export default function ProformaForm({
   initialData?.dateEmission ??
   new Date().toLocaleDateString('en-CA'),
 
-   dateValidite:
+dateValidite:
   initialData?.dateValidite ??
-  new Date().toISOString().split('T')[0],
+  new Date().toLocaleDateString('en-CA'),
 
     tva: initialData?.tva ?? 18,
 
