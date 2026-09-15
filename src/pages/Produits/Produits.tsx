@@ -88,14 +88,18 @@ useEffect(() => {
   async function handleUpdateProduit(data: ProduitFormData) {
   if (!editingProduit) return;
 
-  const updatedProduit = {
-    ...editingProduit,
-    ...data,
-  };
+ const updatedProduit = {
+  reference: data.reference,
+  nom: data.nom,
+  categorie: data.categorie,
+  prix: data.prix,
+  unite: data.unite,
+  statut: data.statut,
+};
 
   try {
     const response = await api.put(
-  `/produits/${updatedProduit.id}`,
+  `/produits/${editingProduit.id}`,
   updatedProduit,
 );
 
