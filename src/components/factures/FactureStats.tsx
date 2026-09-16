@@ -44,7 +44,7 @@ export default function FactureStats({ factures }: Props) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+   <div className="grid grid-cols-4 gap-4">
       {stats.map((stat) => (
         <Card key={stat.title}>
           <p className="text-sm text-slate-500">{stat.title}</p>
