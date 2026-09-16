@@ -56,7 +56,7 @@ export default function FactureTable({
               <td className="whitespace-nowrap">{facture.client}</td>
 
               <td className="whitespace-nowrap">
-                {new Date(facture.dateEmission).toLocaleDateString('fr-FR')}
+                {facture.dateEmission.slice(0, 10).split('-').reverse().join('/')}
               </td>
 
               <td className="whitespace-nowrap font-medium">
