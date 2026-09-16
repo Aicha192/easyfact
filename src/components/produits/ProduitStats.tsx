@@ -39,7 +39,7 @@ export default function ProduitStats({ produits }: Props) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-4 gap-4">
       {cards.map((card) => (
         <div key={card.title} className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="text-sm text-slate-500">{card.title}</p>
