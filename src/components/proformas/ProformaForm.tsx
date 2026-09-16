@@ -24,7 +24,7 @@ export default function ProformaForm({
 
   dateEmission:
   initialData?.dateEmission ??
-  new Date().toLocaleDateString('en-CA'),
+ `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`,
 
 dateValidite:
   initialData?.dateValidite ??
