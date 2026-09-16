@@ -414,7 +414,7 @@ export default function Proformas() {
                 <td className="whitespace-nowrap">{proforma.client}</td>
 
                 <td className="whitespace-nowrap">
-                  {new Date(proforma.dateEmission).toLocaleDateString('fr-FR')}
+                  {proforma.dateEmission.slice(0, 10).split('-').reverse().join('/')}
                 </td>
 
                 <td className="whitespace-nowrap">
