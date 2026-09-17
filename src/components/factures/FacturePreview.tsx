@@ -27,7 +27,7 @@ export default function FacturePreview({ facture, items }: Props) {
         );
       });
   }, []);
-  
+
   function handlePrint() {
     window.print();
   }
@@ -98,9 +98,9 @@ export default function FacturePreview({ facture, items }: Props) {
         </div>
 
         <div className="text-right text-sm">
-          <p>Date émission : {facture.dateEmission}</p>
+         <p>Date émission : {facture.dateEmission.slice(0, 10).split('-').reverse().join('/')}</p>
 
-          <p>Date échéance : {facture.dateEcheance}</p>
+          <p>Date échéance : {facture.dateEcheance.slice(0, 10).split('-').reverse().join('/')}</p>
         </div>
       </div>
 
