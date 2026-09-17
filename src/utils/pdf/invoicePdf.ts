@@ -17,6 +17,9 @@ function cleanText(text: string) {
 function formatMoney(value: number, devise: string) {
   return `${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} ${devise}`;
 }
+function formatDate(date: string) {
+  return date.slice(0, 10).split('-').reverse().join('/');
+}
 
 export async function generateInvoicePdf(
   facture: Facture,
@@ -141,9 +144,9 @@ try {
     doc.text(`RCCM : ${entreprise.rccm}`, 120, 100);
   }
 
-  doc.text(`Date émission : ${facture.dateEmission}`, 120, 108);
+  doc.text(`Date émission : ${formatDate(facture.dateEmission)}`, 120, 108);
 
-  doc.text(`Date échéance : ${facture.dateEcheance}`, 120, 116);
+  doc.text(`Date échéance : ${formatDate(facture.dateEcheance)}`, 120, 116);
 
   // =====================
   // FILIGRANE
