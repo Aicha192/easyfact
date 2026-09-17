@@ -263,16 +263,28 @@ export function useFactures() {
 
     if (!facture) return;
 
-    const factureModifiee: Facture = {
-      ...facture,
-      statut,
-    };
-
-    try {
-      const response = await api.put(
-        `/factures/${id}`,
-        factureModifiee,
-      );
+try {
+    const response = await api.put(
+  `/factures/${id}`,
+  {
+    numero: facture.numero,
+    client: facture.client,
+    items: facture.items.map((item) => ({
+      id: item.id,
+      designation: item.designation,
+      quantite: item.quantite,
+      prixUnitaire: item.prixUnitaire,
+      total: item.total,
+    })),
+    dateEmission: facture.dateEmission,
+    dateEcheance: facture.dateEcheance,
+    montantHT: facture.montantHT,
+    tva: facture.tva,
+    montantTTC: facture.montantTTC,
+    statut,
+    notes: facture.notes,
+  },
+);
       const factureMiseAJour: Facture =
         response.data.facture;
 
