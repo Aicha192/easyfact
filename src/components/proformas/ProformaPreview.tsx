@@ -101,9 +101,9 @@ export default function ProformaPreview({ proforma }: Props) {
         </div>
 
         <div className="text-right text-sm">
-          <p>Date émission : {proforma.dateEmission}</p>
+          <p>Date émission : {proforma.dateEmission.slice(0, 10).split('-').reverse().join('/')}</p>
 
-          <p>Date de validité : {proforma.dateValidite}</p>
+          <p>Date de validité : {proforma.dateValidite.slice(0, 10).split('-').reverse().join('/')}</p>
         </div>
       </div>
 
