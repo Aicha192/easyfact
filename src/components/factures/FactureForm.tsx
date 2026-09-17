@@ -27,7 +27,7 @@ interface Props {
 }
 
 function formatDate(date: Date) {
-  return date.toISOString().split('T')[0];
+  return date.toLocaleDateString('en-CA');
 }
 
 export default function FactureForm({
