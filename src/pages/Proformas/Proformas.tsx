@@ -241,7 +241,7 @@ export default function Proformas() {
         numero: generateNumber('FAC', getNextFacture()),
         client: proforma.client,
         items: proforma.items,
-        dateEmission: new Date().toISOString(),
+       dateEmission: new Date().toLocaleDateString('en-CA'),
         dateEcheance: proforma.dateValidite,
         montantHT: proforma.montantHT,
         tva: proforma.tva,
