@@ -13,6 +13,10 @@ function formatMoney(value: number, devise: string) {
   return `${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} ${devise}`;
 }
 
+function formatDate(date: string) {
+  return date.slice(0, 10).split('-').reverse().join('/');
+}
+
 export async function generateProformaPdf(
   proforma: Proforma,
   action: 'download' | 'print' = 'download',
@@ -135,9 +139,9 @@ const client = response.data.find(
     doc.text(`RCCM : ${entreprise.rccm}`, 120, 100);
   }
 
-  doc.text(`Date émission : ${proforma.dateEmission}`, 120, 108);
+  doc.text(`Date émission : ${formatDate(proforma.dateEmission)}`, 120, 108);
 
-  doc.text(`Validité : ${proforma.dateValidite}`, 120, 116);
+  doc.text(`Validité : ${formatDate(proforma.dateValidite)}`, 120, 116);
 
   // =====================
   // FILIGRANE
