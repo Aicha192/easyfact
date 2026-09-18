@@ -141,7 +141,7 @@ const client = response.data.find(
 
   doc.text(`Date émission : ${formatDate(proforma.dateEmission)}`, 120, 108);
 
-  doc.text(`Validité : ${formatDate(proforma.dateValidite)}`, 120, 116);
+  doc.text(`Date de validité : ${formatDate(proforma.dateValidite)}`, 120, 116);
 
   // =====================
   // FILIGRANE
