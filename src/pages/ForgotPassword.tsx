@@ -11,20 +11,54 @@ export default function ForgotPassword() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!email.trim()) {
       toast.error('Veuillez saisir votre adresse e-mail.');
-
       return;
     }
 
-    // Simulation d'envoi du lien
-    navigate('/email-sent', {
-      state: {
-        email,
-      },
-    });
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(
+        'https://easyfact-backend-production.up.railway.app/auth/forgot-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(
+          data.message ||
+            'Impossible d’envoyer le lien de réinitialisation.',
+        );
+        return;
+      }
+
+      navigate('/email-sent', {
+        state: {
+          email: email.trim(),
+        },
+      });
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        'Impossible de contacter le serveur. Veuillez réessayer.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -61,8 +95,11 @@ export default function ForgotPassword() {
           />
 
           <div className="mt-6">
-            <Button onClick={handleSubmit} className="w-full">
-              Continuer
+            <Button
+              onClick={handleSubmit}
+              className="w-full"
+            >
+              {isLoading ? 'Envoi en cours...' : 'Continuer'}
             </Button>
           </div>
         </div>

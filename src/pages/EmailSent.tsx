@@ -1,6 +1,7 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { MailCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 import AuthLayout from '../layouts/AuthLayout';
 import Button from '../components/ui/Button';
@@ -8,23 +9,59 @@ import Button from '../components/ui/Button';
 export default function EmailSent() {
   const location = useLocation();
 
-  const navigate = useNavigate();
+  const email = location.state?.email || '';
 
-  const email = location.state?.email || 'votre adresse e-mail';
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleResend() {
-    toast.success(`Le lien a été renvoyé à ${email}`);
-  }
+  async function handleResend() {
+    if (!email) {
+      toast.error(
+        'Adresse e-mail introuvable. Veuillez refaire une demande.',
+      );
+      return;
+    }
 
-  function handleContinue() {
-    navigate('/reset-password');
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(
+        'https://easyfact-backend-production.up.railway.app/auth/forgot-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(
+          data.message ||
+            'Impossible de renvoyer le lien de réinitialisation.',
+        );
+        return;
+      }
+
+      toast.success(`Un nouveau lien a été envoyé à ${email}.`);
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        'Impossible de contacter le serveur. Veuillez réessayer.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <AuthLayout>
       <div>
-        {/* Icône */}
-
         <div
           className="
             mx-auto
@@ -43,12 +80,12 @@ export default function EmailSent() {
 
         <h2
           className="
-    mt-8
-    text-2xl
-    font-bold
-    text-gray-800
-    sm:text-3xl
-  "
+            mt-8
+            text-2xl
+            font-bold
+            text-gray-800
+            sm:text-3xl
+          "
         >
           Vérifiez votre boîte e-mail
         </h2>
@@ -65,13 +102,13 @@ export default function EmailSent() {
 
         <p
           className="
-  mt-3
-  break-words
-  font-semibold
-  text-emerald-600
-"
+            mt-3
+            break-words
+            font-semibold
+            text-emerald-600
+          "
         >
-          {email}
+          {email || 'votre adresse e-mail'}
         </p>
 
         <p
@@ -81,41 +118,28 @@ export default function EmailSent() {
             leading-7
           "
         >
-          Cliquez sur le lien reçu dans votre boîte e-mail pour créer un nouveau
-          mot de passe.
+          Cliquez sur le lien reçu dans votre boîte e-mail pour créer un
+          nouveau mot de passe.
         </p>
 
         <div className="mt-8 space-y-4">
-          <Button onClick={handleResend} className="w-full">
-            Renvoyer le lien
-          </Button>
-
-          <button
-            onClick={handleContinue}
-            className="
-    w-full
-    rounded-xl
-    border
-    border-emerald-600
-    py-3
-    font-semibold
-    text-emerald-600
-    transition
-    hover:bg-emerald-50
-  "
+          <Button
+            onClick={handleResend}
+            className="w-full"
           >
-            Continuer (simulation)
-          </button>
+            {isLoading ? 'Envoi en cours...' : 'Renvoyer le lien'}
+          </Button>
 
           <Link
             to="/login"
             className="
-      block
-      text-sm
-      font-medium
-      text-emerald-600
-      hover:underline
-    "
+              block
+              text-center
+              text-sm
+              font-medium
+              text-emerald-600
+              hover:underline
+            "
           >
             ← Retour à la connexion
           </Link>
