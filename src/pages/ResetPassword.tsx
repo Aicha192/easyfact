@@ -16,41 +16,78 @@ export default function ResetPassword() {
   );
 
   const [password, setPassword] = useState('');
-
   const [confirmation, setConfirmation] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!password.trim()) {
       toast.error('Veuillez saisir un nouveau mot de passe.');
-
       return;
     }
 
-    if (password.length < 6) {
-      toast.error('Le mot de passe doit contenir au moins 6 caractères.');
-
+    if (password.length < 8) {
+      toast.error('Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
 
     if (password !== confirmation) {
       toast.error('Les mots de passe ne correspondent pas.');
-
       return;
     }
 
-    toast.success('Mot de passe modifié avec succès.');
+    const token = new URLSearchParams(window.location.search).get('token');
 
-    addNotification({
-      title: 'Mot de passe modifié',
+    if (!token) {
+      toast.error('Lien de réinitialisation invalide.');
+      return;
+    }
 
-      message: 'Votre mot de passe a été changé avec succès.',
+    try {
+      setIsLoading(true);
 
-      createdAt: Date.now(),
+      const response = await fetch(
+        'https://easyfact-backend-production.up.railway.app/auth/reset-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token,
+            password,
+          }),
+        },
+      );
 
-      type: 'auth',
-    });
+      const data = await response.json();
 
-    navigate('/password-changed');
+      if (!response.ok) {
+        toast.error(
+          data.message ||
+            'Impossible de réinitialiser le mot de passe.',
+        );
+        return;
+      }
+
+      toast.success('Mot de passe modifié avec succès.');
+
+      addNotification({
+        title: 'Mot de passe modifié',
+        message: 'Votre mot de passe a été changé avec succès.',
+        createdAt: Date.now(),
+        type: 'auth',
+      });
+
+      navigate('/password-changed');
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        'Impossible de contacter le serveur. Veuillez réessayer.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -92,7 +129,11 @@ export default function ResetPassword() {
             onChange={(e) => setConfirmation(e.target.value)}
           />
 
-          <Button onClick={handleSubmit}>Changer le mot de passe</Button>
+          <Button onClick={handleSubmit}>
+            {isLoading
+              ? 'Modification en cours...'
+              : 'Changer le mot de passe'}
+          </Button>
         </div>
       </div>
     </AuthLayout>
