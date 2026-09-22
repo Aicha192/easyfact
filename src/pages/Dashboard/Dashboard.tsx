@@ -107,12 +107,10 @@ const totalProduits = produitsBackend.length;
         </div>
 
         <QuickActions
-          onNewFacture={() => navigate('/factures')}
-
-          onNewClient={() => navigate('/clients')}
-
-          onNewProforma={() => navigate('/proformas')}
-        />
+  onNewFacture={() => navigate('/factures?action=new')}
+  onNewClient={() => navigate('/clients?action=new')}
+  onNewProforma={() => navigate('/proformas?action=new')}
+/>
       </div>
 
       {/* Dernières factures */}

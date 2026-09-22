@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
+import { useEffect } from 'react';
 import Modal from '../../components/ui/Modal';
 import Sheet from '../../components/ui/Sheet';
 import FactureForm from '../../components/factures/FactureForm';
@@ -45,6 +45,12 @@ export default function Factures() {
   const [previewOpen, setPreviewOpen] = useState(
     Boolean(location.state?.previewId),
   );
+
+  useEffect(() => {
+  if (location.search === '?action=new') {
+    setIsOpen(true);
+  }
+}, [location.search]);
 
   return (
     <div className="space-y-6">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Plus } from 'lucide-react';
 
@@ -18,6 +19,7 @@ import type { Client } from '../../types/client';
 import api from '../../lib/axios';
 
 export default function Clients() {
+const location = useLocation();
   const clients = useClientStore((state) => state.clients);
   const setClients = useClientStore((state) => state.setClients);
   const addClient = useClientStore((state) => state.addClient);
@@ -56,6 +58,13 @@ export default function Clients() {
         toast.error('Impossible de récupérer les clients.');
       });
   }, [setClients]);
+
+  useEffect(() => {
+  if (location.search === '?action=new') {
+    setEditingClient(null);
+    setIsOpen(true);
+  }
+}, [location.search]);
 
   // Création
   async function handleAddClient(data: ClientFormData) {

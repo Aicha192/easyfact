@@ -49,6 +49,13 @@ export default function Proformas() {
 
   const [previewProforma, setPreviewProforma] = useState<Proforma | null>(null);
 
+  useEffect(() => {
+  if (location.search === '?action=new') {
+    setEditingProforma(null);
+    setIsOpen(true);
+  }
+}, [location.search]);
+
   const addNotification = useNotificationStore(
     (state) => state.addNotification,
   );
