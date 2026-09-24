@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
-
+import api from '../lib/axios';
 import AuthLayout from '../layouts/AuthLayout';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -22,29 +22,9 @@ export default function ForgotPassword() {
     try {
       setIsLoading(true);
 
-      const response = await fetch(
-        'https://easyfact-backend-production.up.railway.app/auth/forgot-password',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.trim(),
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(
-          data.message ||
-            'Impossible d’envoyer le lien de réinitialisation.',
-        );
-        return;
-      }
-
+      await api.post('/auth/forgot-password', {
+        email: email.trim(),
+});
       navigate('/email-sent', {
         state: {
           email: email.trim(),

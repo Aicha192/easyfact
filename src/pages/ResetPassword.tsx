@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
-
+import api from '../lib/axios';
 import AuthLayout from '../layouts/AuthLayout';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -45,30 +45,10 @@ export default function ResetPassword() {
     try {
       setIsLoading(true);
 
-      const response = await fetch(
-        'https://easyfact-backend-production.up.railway.app/auth/reset-password',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token,
-            password,
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(
-          data.message ||
-            'Impossible de réinitialiser le mot de passe.',
-        );
-        return;
-      }
-
+      await api.post('/auth/reset-password', {
+  token,
+  password,
+});
       toast.success('Mot de passe modifié avec succès.');
 
       addNotification({
