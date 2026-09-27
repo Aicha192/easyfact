@@ -102,7 +102,6 @@ export function useFactures() {
      const response = await api.post(
   '/factures',
   {
-    numero: facture.numero,
     client: facture.client,
     items: facture.items.map((item) => ({
       designation: item.designation,

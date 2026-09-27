@@ -12,8 +12,6 @@ import type { FactureItem } from '../../types/factureItem';
 import type { Facture } from '../../types/facture';
 import type { FactureFormData } from './FactureForm.types';
 import FactureItems from './FactureItems';
-import { useNumeroStore } from '../../store/numeroStore';
-import { generateNumber } from '../../utils/numberGenerator';
 
 import {
   factureSchema,
@@ -39,10 +37,6 @@ export default function FactureForm({
 
   const nextMonth = formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
 
-  const nextFacture = useNumeroStore((state) => state.getNextFacture());
-
-  const incrementFacture = useNumeroStore((state) => state.incrementFacture);
-
   const [items, setItems] = useState<FactureItem[]>([]);
 
 const [clients, setClients] = useState<Client[]>([]);
@@ -67,7 +61,7 @@ useEffect(() => {
 
   const defaultValues: FactureFormSchema = {
     client: initialData?.client ?? '',
-    numero: initialData?.numero ?? generateNumber('FAC', nextFacture),
+   numero: initialData?.numero ?? '',
     dateEmission: initialData?.dateEmission ?? today,
     dateEcheance: initialData?.dateEcheance ?? nextMonth,
     tva: initialData?.tva ?? 18,
@@ -103,7 +97,7 @@ useEffect(() => {
   } else {
     reset({
       client: '',
-      numero: generateNumber('FAC', nextFacture),
+      numero: '',
       dateEmission: today,
       dateEcheance: nextMonth,
       tva: 18,
@@ -113,7 +107,7 @@ useEffect(() => {
 
     setItems([]);
   }
-}, [initialData, nextFacture, nextMonth, reset, today]);
+}, [initialData, nextMonth, reset, today]);
 
   const clientValue = watch('client');
   const tvaValue = watch('tva');
@@ -163,9 +157,6 @@ useEffect(() => {
   }
 
   function handleFormSubmit(data: FactureFormSchema) {
-    if (!initialData) {
-      incrementFacture();
-    }
 
     onSubmit({
       id: initialData?.id ?? Date.now(),
@@ -264,11 +255,26 @@ useEffect(() => {
           </div>
         )}
 
-        <div>
-          <Input label="Numéro" {...register('numero')} readOnly />
+              <div>
+                {initialData ? (
+            <>
+              <Input label="Numéro" {...register('numero')} readOnly />
 
-          {errors.numero && (
-            <p className="mt-1 text-sm text-red-500">{errors.numero.message}</p>
+              {errors.numero && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.numero.message}
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <p className="text-sm font-medium text-emerald-700">
+                Numéro de facture
+              </p>
+              <p className="mt-1 text-sm text-emerald-600">
+                Le numéro sera attribué automatiquement lors de la création.
+              </p>
+            </div>
           )}
         </div>
 

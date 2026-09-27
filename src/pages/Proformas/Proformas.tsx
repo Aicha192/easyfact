@@ -21,8 +21,6 @@ import { useProformaStore } from '../../store/proformaStore';
 import { generateProformaPdf } from '../../utils/pdf/proformaPdf';
 import { useFactureStore } from '../../store/factureStore';
 import ProformaPreview from '../../components/proformas/ProformaPreview';
-import { useNumeroStore } from '../../store/numeroStore';
-import { generateNumber } from '../../utils/numberGenerator';
 import { useNotificationStore } from '../../store/notificationStore';
 import ProformaSearch from '../../components/proformas/ProformaSearch';
 import toast from 'react-hot-toast';
@@ -77,8 +75,6 @@ export default function Proformas() {
       proforma.numero.toLowerCase().includes(search.toLowerCase()) ||
       proforma.client.toLowerCase().includes(search.toLowerCase()),
   );
-
-  const getNextFacture = useNumeroStore((state) => state.getNextFacture);
 
   useEffect(() => {
     const previewId = location.state?.previewId;
@@ -158,8 +154,8 @@ export default function Proformas() {
   async function handleUpdateProforma(proforma: Proforma) {
     try {
       const response = await api.put(
-  `/proformas/${proforma.id}`,
-  {
+        `/proformas/${proforma.id}`,
+    {
     numero: proforma.numero,
     client: proforma.client,
     items: proforma.items.map((item) => ({
@@ -243,9 +239,9 @@ export default function Proformas() {
 
   async function handleConvertToFacture(proforma: Proforma) {
     try {
-      const factureAcreer: Facture = {
+     const factureAcreer: Facture = {
         id: 0,
-        numero: generateNumber('FAC', getNextFacture()),
+        numero: '',
         client: proforma.client,
         items: proforma.items,
        dateEmission: new Date().toLocaleDateString('en-CA'),
@@ -257,10 +253,9 @@ export default function Proformas() {
         notes: `Créée depuis la proforma ${proforma.numero}`,
       };
 
-      const factureResponse = await api.post(
-  '/factures',
-  {
-    numero: factureAcreer.numero,
+     const factureResponse = await api.post(
+       '/factures',
+    {
     client: factureAcreer.client,
     items: factureAcreer.items.map((item) => ({
       designation: item.designation,
