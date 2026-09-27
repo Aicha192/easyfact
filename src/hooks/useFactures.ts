@@ -157,7 +157,6 @@ export function useFactures() {
      const response = await api.put(
   `/factures/${updatedFacture.id}`,
   {
-    numero: updatedFacture.numero,
     client: updatedFacture.client,
     items: updatedFacture.items.map((item) => ({
       id: item.id,
@@ -266,7 +265,6 @@ try {
     const response = await api.put(
   `/factures/${id}`,
   {
-    numero: facture.numero,
     client: facture.client,
     items: facture.items.map((item) => ({
       id: item.id,
