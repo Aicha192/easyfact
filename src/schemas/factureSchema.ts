@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const factureSchema = z.object({
   client: z.string().min(1, 'Veuillez sélectionner un client.'),
 
-  numero: z.string().min(1, 'Le numéro de facture est obligatoire.'),
+  numero: z.string().optional(),
 
   dateEmission: z.string().min(1, "La date d'émission est obligatoire."),
 

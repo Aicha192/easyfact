@@ -28,6 +28,10 @@ function formatDate(date: Date) {
   return date.toLocaleDateString('en-CA');
 }
 
+function formatInputDate(date: string) {
+  return date.includes('T') ? date.split('T')[0] : date;
+}
+
 export default function FactureForm({
   initialData,
   onSubmit,
@@ -62,8 +66,12 @@ useEffect(() => {
   const defaultValues: FactureFormSchema = {
     client: initialData?.client ?? '',
    numero: initialData?.numero ?? '',
-    dateEmission: initialData?.dateEmission ?? today,
-    dateEcheance: initialData?.dateEcheance ?? nextMonth,
+dateEmission: initialData?.dateEmission
+  ? formatInputDate(initialData.dateEmission)
+  : today,
+dateEcheance: initialData?.dateEcheance
+  ? formatInputDate(initialData.dateEcheance)
+  : nextMonth,
     tva: initialData?.tva ?? 18,
     statut: initialData?.statut ?? 'Brouillon',
     notes: initialData?.notes ?? '',
@@ -161,7 +169,7 @@ useEffect(() => {
     onSubmit({
       id: initialData?.id ?? Date.now(),
 
-      numero: data.numero,
+      numero: data.numero ?? '',
 
       client: data.client,
 
