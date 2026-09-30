@@ -27,7 +27,21 @@ export async function generateInvoicePdf(
 ) {
   const doc = new jsPDF();
 
-  const entreprise = useParametresStore.getState().parametres;
+  let entreprise = useParametresStore.getState().parametres;
+
+try {
+  const response = await api.get('/parametres');
+
+  if (response.data) {
+    entreprise = response.data;
+    useParametresStore.getState().updateParametres(response.data);
+  }
+} catch (error) {
+  console.error(
+    'Erreur lors de la récupération des paramètres pour le PDF :',
+    error,
+  );
+}
 
  let client: Client | undefined;
 
