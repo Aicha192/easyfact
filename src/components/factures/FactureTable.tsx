@@ -29,20 +29,28 @@ export default function FactureTable({
 }: Props) {
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
-      <table className="w-full min-w-[900px]">
+      <table className="w-full min-w-[1450px] table-fixed">
+          <colgroup>
+            <col className="w-[200px]" />
+            <col className="w-[300px]" />
+            <col className="w-[160px]" />
+            <col className="w-[250px]" />
+            <col className="w-[140px]" />
+            <col className="w-[400px]" />
+          </colgroup>
         <thead className="bg-slate-100">
           <tr>
-            <th className="p-4 text-left">Facture</th>
+            <th className="w-[180px] p-4 text-left">Facture</th>
 
-            <th>Client</th>
+            <th className="w-[260px] text-left">Client</th>
 
-            <th>Date</th>
+            <th className="w-[150px] text-center">Date</th>
 
-            <th>Montant TTC</th>
+            <th className="w-[170px] text-center">Montant TTC</th>
 
-            <th>Statut</th>
+            <th className="w-[140px] text-center">Statut</th>
 
-            <th>Actions</th>
+            <th className="w-[380px] text-center">Actions</th>
           </tr>
         </thead>
 
@@ -53,13 +61,17 @@ export default function FactureTable({
                 {facture.numero}
               </td>
 
-              <td className="whitespace-nowrap">{facture.client}</td>
+              <td className="px-4">
+                <div className="truncate" title={facture.client}>
+                  {facture.client}
+                </div>
+              </td>
 
-              <td className="whitespace-nowrap">
+              <td className="whitespace-nowrap px-4 text-center">
                 {facture.dateEmission.slice(0, 10).split('-').reverse().join('/')}
               </td>
 
-              <td className="whitespace-nowrap font-medium">
+              <td className="whitespace-nowrap px-4 text-center font-medium">
                 {facture.montantTTC.toLocaleString()} FCFA
               </td>
 
