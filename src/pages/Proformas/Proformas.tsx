@@ -386,23 +386,31 @@ export default function Proformas() {
       {/* Tableau */}
 
       <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        <table className="w-full min-w-[900px]">
+        <table className="w-full min-w-[1450px] table-fixed">
+          <colgroup>
+            <col className="w-[200px]" />
+            <col className="w-[300px]" />
+            <col className="w-[160px]" />
+            <col className="w-[250px]" />
+            <col className="w-[140px]" />
+            <col className="w-[400px]" />
+          </colgroup>
           <thead className="bg-slate-100">
             <tr>
-              <th className="p-4 text-left">Numéro</th>
+              <th className="w-[180px] p-4 text-left">Numéro</th>
 
-              <th>Client</th>
+              <th className="w-[260px] text-left">Client</th>
 
-              <th className="w-32 text-center leading-tight">
+              <th className="w-[150px] text-center leading-tight">
                 <span className="block">Date</span>
                 <span className="block">d'émission</span>
               </th>
 
-              <th>Montant TTC</th>
+              <th className="w-[170px] text-center">Montant TTC</th>
 
-              <th>Statut</th>
+              <th className="w-[140px] text-center">Statut</th>
 
-              <th>Actions</th>
+              <th className="w-[380px] text-center">Actions</th>
             </tr>
           </thead>
 
@@ -413,13 +421,17 @@ export default function Proformas() {
                   {proforma.numero}
                 </td>
 
-                <td className="whitespace-nowrap">{proforma.client}</td>
+                <td className="px-4">
+                  <div className="truncate" title={proforma.client}>
+                    {proforma.client}
+                  </div>
+                </td>
 
-                <td className="whitespace-nowrap">
+                <td className="whitespace-nowrap px-4 text-center">
                   {proforma.dateEmission.slice(0, 10).split('-').reverse().join('/')}
                 </td>
 
-                <td className="whitespace-nowrap">
+                <td className="whitespace-nowrap px-4 text-center">
                   {proforma.montantTTC.toLocaleString()} FCFA
                 </td>
 
