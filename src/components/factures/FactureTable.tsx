@@ -35,8 +35,8 @@ export default function FactureTable({
             <col className="w-[300px]" />
             <col className="w-[160px]" />
             <col className="w-[250px]" />
-            <col className="w-[140px]" />
-            <col className="w-[400px]" />
+            <col className="w-[180px]" />
+            <col className="w-[360px]" />
           </colgroup>
         <thead className="bg-slate-100">
           <tr>
