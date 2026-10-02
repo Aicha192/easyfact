@@ -48,11 +48,11 @@ export default function Proformas() {
   const [previewProforma, setPreviewProforma] = useState<Proforma | null>(null);
 
   useEffect(() => {
-  if (location.search === '?action=new') {
-    setEditingProforma(null);
-    setIsOpen(true);
-  }
-}, [location.search]);
+    if (location.search === '?action=new') {
+      setEditingProforma(null);
+      setIsOpen(true);
+    }
+  }, [location.search]);
 
   const addNotification = useNotificationStore(
     (state) => state.addNotification,
@@ -118,13 +118,10 @@ export default function Proformas() {
           designation: item.designation,
           quantite: item.quantite,
           prixUnitaire: item.prixUnitaire,
-          total: item.total,
         })),
         dateEmission: proforma.dateEmission,
         dateValidite: proforma.dateValidite,
-        montantHT: proforma.montantHT,
         tva: proforma.tva,
-        montantTTC: proforma.montantTTC,
         statut: proforma.statut,
         notes: proforma.notes,
       });
@@ -153,27 +150,20 @@ export default function Proformas() {
 
   async function handleUpdateProforma(proforma: Proforma) {
     try {
-      const response = await api.put(
-        `/proformas/${proforma.id}`,
-    {
-    numero: proforma.numero,
-    client: proforma.client,
-    items: proforma.items.map((item) => ({
-      id: item.id,
-      designation: item.designation,
-      quantite: item.quantite,
-      prixUnitaire: item.prixUnitaire,
-      total: item.total,
-    })),
-    dateEmission: proforma.dateEmission,
-    dateValidite: proforma.dateValidite,
-    montantHT: proforma.montantHT,
-    tva: proforma.tva,
-    montantTTC: proforma.montantTTC,
-    statut: proforma.statut,
-    notes: proforma.notes,
-  },
-);
+      const response = await api.put(`/proformas/${proforma.id}`, {
+        numero: proforma.numero,
+        client: proforma.client,
+        items: proforma.items.map((item) => ({
+          designation: item.designation,
+          quantite: item.quantite,
+          prixUnitaire: item.prixUnitaire,
+        })),
+        dateEmission: proforma.dateEmission,
+        dateValidite: proforma.dateValidite,
+        tva: proforma.tva,
+        statut: proforma.statut,
+        notes: proforma.notes,
+      });
 
       const proformaModifiee: Proforma = response.data.proforma;
 
@@ -239,12 +229,12 @@ export default function Proformas() {
 
   async function handleConvertToFacture(proforma: Proforma) {
     try {
-     const factureAcreer: Facture = {
+      const factureAcreer: Facture = {
         id: 0,
         numero: '',
         client: proforma.client,
         items: proforma.items,
-       dateEmission: new Date().toLocaleDateString('en-CA'),
+        dateEmission: new Date().toLocaleDateString('en-CA'),
         dateEcheance: proforma.dateValidite,
         montantHT: proforma.montantHT,
         tva: proforma.tva,
@@ -253,52 +243,42 @@ export default function Proformas() {
         notes: `Créée depuis la proforma ${proforma.numero}`,
       };
 
-     const factureResponse = await api.post(
-       '/factures',
-    {
-    client: factureAcreer.client,
-    items: factureAcreer.items.map((item) => ({
-      designation: item.designation,
-      quantite: item.quantite,
-      prixUnitaire: item.prixUnitaire,
-      total: item.total,
-    })),
-    dateEmission: factureAcreer.dateEmission,
-    dateEcheance: factureAcreer.dateEcheance,
-    montantHT: factureAcreer.montantHT,
-    tva: factureAcreer.tva,
-    montantTTC: factureAcreer.montantTTC,
-    statut: factureAcreer.statut,
-    notes: factureAcreer.notes,
-  },
-);
+      const factureResponse = await api.post('/factures', {
+        client: factureAcreer.client,
+        items: factureAcreer.items.map((item) => ({
+          designation: item.designation,
+          quantite: item.quantite,
+          prixUnitaire: item.prixUnitaire,
+          total: item.total,
+        })),
+        dateEmission: factureAcreer.dateEmission,
+        dateEcheance: factureAcreer.dateEcheance,
+        montantHT: factureAcreer.montantHT,
+        tva: factureAcreer.tva,
+        montantTTC: factureAcreer.montantTTC,
+        statut: factureAcreer.statut,
+        notes: factureAcreer.notes,
+      });
 
       const factureCreee: Facture = factureResponse.data.facture;
 
       addFacture(factureCreee);
 
-     const proformaResponse = await api.put(
-  `/proformas/${proforma.id}`,
-  {
-    numero: proforma.numero,
-    client: proforma.client,
-    items: proforma.items.map((item) => ({
-      id: item.id,
-      designation: item.designation,
-      quantite: item.quantite,
-      prixUnitaire: item.prixUnitaire,
-      total: item.total,
-    })),
-    dateEmission: proforma.dateEmission,
-    dateValidite: proforma.dateValidite,
-    montantHT: proforma.montantHT,
-    tva: proforma.tva,
-    montantTTC: proforma.montantTTC,
-    statut: proforma.statut,
-    notes: proforma.notes,
-    factureNumero: factureCreee.numero,
-  },
-     );
+      const proformaResponse = await api.put(`/proformas/${proforma.id}`, {
+        numero: proforma.numero,
+        client: proforma.client,
+        items: proforma.items.map((item) => ({
+          designation: item.designation,
+          quantite: item.quantite,
+          prixUnitaire: item.prixUnitaire,
+        })),
+        dateEmission: proforma.dateEmission,
+        dateValidite: proforma.dateValidite,
+        tva: proforma.tva,
+        statut: proforma.statut,
+        notes: proforma.notes,
+        factureNumero: factureCreee.numero,
+      });
       const proformaModifiee: Proforma = proformaResponse.data.proforma;
 
       updateProforma(proformaModifiee);
@@ -428,7 +408,11 @@ export default function Proformas() {
                 </td>
 
                 <td className="whitespace-nowrap px-4 text-center">
-                  {proforma.dateEmission.slice(0, 10).split('-').reverse().join('/')}
+                  {proforma.dateEmission
+                    .slice(0, 10)
+                    .split('-')
+                    .reverse()
+                    .join('/')}
                 </td>
 
                 <td className="whitespace-nowrap px-4 text-center">
