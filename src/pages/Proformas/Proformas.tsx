@@ -246,16 +246,13 @@ export default function Proformas() {
       const factureResponse = await api.post('/factures', {
         client: factureAcreer.client,
         items: factureAcreer.items.map((item) => ({
-          designation: item.designation,
-          quantite: item.quantite,
-          prixUnitaire: item.prixUnitaire,
-          total: item.total,
-        })),
+  designation: item.designation,
+  quantite: item.quantite,
+  prixUnitaire: item.prixUnitaire,
+})),
         dateEmission: factureAcreer.dateEmission,
         dateEcheance: factureAcreer.dateEcheance,
-        montantHT: factureAcreer.montantHT,
         tva: factureAcreer.tva,
-        montantTTC: factureAcreer.montantTTC,
         statut: factureAcreer.statut,
         notes: factureAcreer.notes,
       });
